@@ -13,6 +13,7 @@
     "@imagekit/javascript": "^5.2.2",
     "@imagekit/react": "^5.0.2",
     "glob": "^13.0.6",
+    "imagekitio-react": "^4.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
