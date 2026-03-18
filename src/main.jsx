@@ -1,42 +1,41 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Homepage from "@/routes/Homepage.jsx";
 import PostListPage from "@/routes/PostListPage.jsx";
-import Write from "@/routes/Write.jsx";   
+import Write from "@/routes/Write.jsx";
 import LoginPage from "@/routes/LoginPage.jsx";
-import SinglePostPage from "@/routes/SinglePostPage"
-import RegisterPage from "@/routes/RegisterPage.jsx"; // ✅ fixed spelling
+import RegisterPage from "@/routes/RegisterPage.jsx";
+import SinglePostPage from "@/routes/SinglePostPage.jsx";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/", 
     element: <Homepage />,
   },
   {
-    path: "/post",
+    path: "/posts", 
     element: <PostListPage />,
   },
   {
-    path: "/slug",
-    element: <SinglePostPage />,
-  },
-  {
-    path: "/write",
+    path: "/write", 
     element: <Write />,
   },
   {
-    path: "/login",
+    path: "/login", 
     element: <LoginPage />,
   },
   {
-    path: "/register",
+    path: "/register", 
     element: <RegisterPage />,
+  },
+  {
+    path: "/:slug",   
+    element: <SinglePostPage />,
+  },
+  {
+    path: "*",       
+    element: <SinglePostPage />,
   },
 ]);
 
