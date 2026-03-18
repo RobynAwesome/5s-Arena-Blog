@@ -5,10 +5,7 @@ import "./index.css";
 import {
   createBrowserRouter,
   RouterProvider,
-  Route,
-  Link,
 } from "react-router-dom";
-
 import Homepage from "./routes/Homepage.jsx";
 import PostListPage from "./routes/PostListPage.jsx";
 import Write from"./Write.jsx";
@@ -16,9 +13,10 @@ import LoginPage from "./routes/LoginPage.jsx";
 import RegistePage from "./routes/RegisterPage.jsx";
 
 
+
 const router = createBrowserRouter ( [
   {
-    Path: "/",
+    path: "/",
     element: <Homepage />
   },
   {
