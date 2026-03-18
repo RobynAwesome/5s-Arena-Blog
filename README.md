@@ -2,13 +2,13 @@
 
 
 
-# 📖 MERN Stack Blog Website
+# 📖 *MERN Stack Blog Website*
 
 A modern MERN stack blog application built with **MongoDB, Express.js, React, and Node.js**, designed to provide a dynamic and responsive blogging platform featuring secure user authentication, role-based access control, CRUD functionality for posts, image uploads, infinite scroll with filters, and social media integration.
 
 ---
 
-## 🚀 Features
+## 🚀 *Features*
 - 🔐 User authentication with JWT
 - 👥 Role-based access (Admin/User)
 - 📝 CRUD operations for blog posts
@@ -20,7 +20,7 @@ A modern MERN stack blog application built with **MongoDB, Express.js, React, an
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ *Tech Stack*
 - **Frontend:** React, React Route, route-dom
 - **TailwindCSS/Material-UI**  
 - **Backend:** Node.js, Express.js  
@@ -33,7 +33,7 @@ The easiest way to dep
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ *Tech Stack*
 * **Backend:** JavaScript (Procedural & Secure)
 * **Database:** MonogoDB, MongoDBatlas
 * **Frontend:** HTML5, CSS3 (Custom Flexbox/Grid Layouts), JavaScript
@@ -41,8 +41,8 @@ The easiest way to dep
 
 ---
 
-## 🔮 Features
-- *Email* & SMS notification system  
+## 🔮 *Features*
+- Email & SMS notification system  
 - **Secure payment** integration for consultation fees
 - Patient medical history tracking  
 - Multi-language support for global accessibility  
@@ -51,7 +51,7 @@ The easiest way to dep
 
 ---
 
-## 🤝 Contributing
+## 🤝 *Contributing*
 * **We welcome contributions from the community!**  
 1. Fork the repository  
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)  
@@ -59,7 +59,7 @@ The easiest way to dep
 4. Push to the branch (`git push origin feature/AmazingFeature`)  
 5. Open a Pull Request  
 
-## 🚀 Usage
+## 🚀 *Usage*
 ### For user's
 - Register/Login to your user account  
 - Browse available appointment slots  
@@ -67,20 +67,20 @@ The easiest way to dep
 - Confirm your appointment booking  
 - Receive confirmation details instantly  
 
-### For 5's Arena Staff (Admin)
+### 🔊 *For 5's Arena Staff (Admin)*
 - Login with your stuff email
 - View all scheduled appointments  
 - Manage appointment availability  
 - Update appointment status  
 
-## 📞 Support
+## 📞 *Support*
 If you have any questions or need support, please [open an issue](https://github.com/RobynAwesome/5s-Arena-Blog-v2/issues) or contact the development team.  
 You can also support ongoing development here: [ko-fi.com/robynawesome](https://ko-fi.com/robynawesome)  
 
-## ⭐ Show Your Support
+## ⭐ *Show Your Support*
 Star this repository if you found it helpful!
 
-## ⚙️ Installation & Setup
+## ⚙️ *Installation & Setup*
 
 **Clone the Repository:**
 ```bash
