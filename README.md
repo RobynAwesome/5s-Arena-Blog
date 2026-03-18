@@ -43,7 +43,7 @@ The easiest way to dep
 
 ## 🔮 Features
 - Email & SMS notification system  
-- * **Secure payment** integration for consultation fees
+- **Secure payment** integration for consultation fees
 - Patient medical history tracking  
 - Multi-language support for global accessibility  
 - Mobile app development roadmap  
