@@ -6,7 +6,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
-import Homepage from "./routes/Homepage.jsx";
+import Homepage from "./routes/HomePage.jsx";
 import PostListPage from "./routes/PostListPage.jsx";
 import Write from "./routes/Write.jsx";   // ✅ fixed path
 import LoginPage from "./routes/LoginPage.jsx";
