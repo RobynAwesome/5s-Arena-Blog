@@ -1,7 +1,11 @@
-const SinglePostpage = () => {
-  return (
-    <div className=''>SinglePostpage</div>
-  )
-}
+import { useParams } from "react-router-dom";
 
-export default SinglePostpage
+export default function SinglePostPage() {
+  const { slug } = useParams();
+  return (
+    <div>
+      <h1>Dynamic Page</h1>
+      <p>You typed: {slug}</p>
+    </div>
+  );
+}
