@@ -8,7 +8,7 @@ import {
 
 import Homepage from "@/routes/Homepage.jsx";
 import PostListPage from "@/routes/PostListPage.jsx";
-import Write from "@/routes/Write.jsx";   // ✅ fixed path
+import Write from "@/routes/Write.jsx";   
 import LoginPage from "@/routes/LoginPage.jsx";
 import RegisterPage from "@/routes/RegisterPage.jsx"; // ✅ fixed spelling
 
