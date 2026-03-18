@@ -26,14 +26,14 @@ function Navbar() {
     {/* MOBILE MENU */}
     <div className="md:hidden">
         <div
-         className="cursor-pointer text-4xl select-none"
+         className="cursor-pointer text-4xl"
          onClick={() => setOpen((prev) => !prev)}
         >
          {open ? "X" : "☰"}
     </div>
     {/* MOBILE LINK LIST */}
         <div
-         className={`w-full h-screen flex flex-col items-center justify-center absoulte top-16 gap-8 font-medium text-lg bg-green-700 transition-transform duration-300 ease-in-out z-50 ${
+         className={`w-full h-screen flex flex-col items-center justify-center gap-8 font-medium text-lg absoulte top-16 font-medium text-lg bg-green-700 transition-transform duration-300 ease-in-out z-50 ${
          open ? "-right-0" : "-right-[100%]"
          }`}
         >
