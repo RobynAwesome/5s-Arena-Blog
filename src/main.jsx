@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { DarkModeProvider } from "@/context/DarkModeContext";
+import "./index.css";
 import Homepage from "@/routes/Homepage.jsx";
 import PostListPage from "@/routes/PostListPage.jsx";
 import Write from "@/routes/Write.jsx";
