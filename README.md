@@ -1,4 +1,5 @@
-![Logo](public/logo.png)
+
+![Logo](/public/logo.png)
 
 # 5s Arena Blog
 
