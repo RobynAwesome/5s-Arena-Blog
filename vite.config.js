@@ -17,6 +17,6 @@ export default defineConfig({
     extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
   },
   build: {
-    chunkSizeWarningLimit: 700,
+    chunkSizeWarningLimit: 800,
   },
 });
