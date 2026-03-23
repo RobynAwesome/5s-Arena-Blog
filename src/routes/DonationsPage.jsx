@@ -8,10 +8,10 @@ const CREATOR_AMOUNTS = [2500, 1000, 500, 200, 100, 50];
 
 /* ── Cycling images ─────────────────────────────────────────── */
 const WEBSITE_SLIDES = [
-  { src: "/donations-and-sponsors/website-donations/website-donations.jpg", caption: "Keeping the pitch alive" },
-  { src: null, bg: "linear-gradient(135deg,#052e16,#0d1117)", caption: "Power our servers 🔧" },
-  { src: null, bg: "linear-gradient(135deg,#1e3a5f,#0d1117)", caption: "Grow our content team 📰" },
-  { src: null, bg: "linear-gradient(135deg,#3b1a5a,#0d1117)", caption: "Expand the arena 🏟️" },
+  { src: "/donations-and-sponsors/website-donations/website-donations-1.jpg", caption: "Keep the Arena alive ⚽" },
+  { src: "/donations-and-sponsors/website-donations/website-donations-2.jpg", caption: "Power our content 🔧" },
+  { src: "/donations-and-sponsors/website-donations/website-donations-3.jpg", caption: "Grow our platform 📰" },
+  { src: "/donations-and-sponsors/website-donations/website-donations-4.jpg", caption: "Expand the Arena 🏟️" },
 ];
 const CREATOR_SLIDES = [
   { src: null, bg: "linear-gradient(135deg,#7c3aed,#052e16)", caption: "Support the creator ✨" },
@@ -160,56 +160,62 @@ function AnimatedTitle() {
 }
 
 /* ── Yearly tier data ─────────────────────────────────────── */
-const TIER_ARENA_PASS = {
-  name: "Arena Pass",
+const TIER_ARENA_FAN = {
+  name: "Arena Fan",
   price: 1200,
   color: "#22c55e",
   gradient: "linear-gradient(135deg,#15803d,#22c55e)",
   glow: "rgba(34,197,94,0.4)",
   icon: "🏟️",
   benefits: [
-    "Early access to articles",
+    "Early article access",
     "Monthly newsletter",
-    "Author badge on comments",
-    "Ad-free reading",
-    "Priority WhatsApp support",
+    "Creator shoutouts",
+    "Arena Fan badge",
   ],
-  requirements: [
-    "Opt in to newsletter email updates",
-    "Enable push notifications",
-  ],
-  ctaLabel: "Subscribe — R 1,200/yr",
 };
 
-const TIER_ARENA_ELITE = {
-  name: "Arena Elite",
+const TIER_ARENA_LEGEND = {
+  name: "Arena Legend",
   price: 2400,
   color: "#a855f7",
   gradient: "linear-gradient(135deg,#7c3aed,#f59e0b)",
   glow: "rgba(168,85,247,0.4)",
   icon: "⭐",
   benefits: [
-    "All Arena Pass benefits",
-    "Exclusive video content",
-    "Direct author Q&A access",
-    "Featured supporter badge",
-    "Analytics insights newsletter",
-    "Data partnership opt-in (personalized content)",
+    "Everything in Tier 1",
+    "Weekly fixtures preview email",
+    "VIP Discord/WhatsApp channel",
+    "Annual digital magazine",
+    "Arena Legend badge + jersey discount",
   ],
-  requirements: [
-    "All Arena Pass requirements",
-    "Consent to data sharing",
-  ],
-  ctaLabel: "Subscribe — R 2,400/yr",
 };
 
 /* ── Yearly tiers panel ──────────────────────────────────── */
-function YearlyTiers({ isCreator }) {
+function YearlyTiers() {
   const kofiUrl = "https://ko-fi.com/robynawesome";
+  const [optNewsletter, setOptNewsletter] = useState(false);
+  const [optPush, setOptPush] = useState(false);
+  const [optData, setOptData] = useState(false);
+
+  const checkboxStyle = (checked, color) => ({
+    width: 16,
+    height: 16,
+    borderRadius: 4,
+    border: `2px solid ${checked ? color : "rgba(255,255,255,0.3)"}`,
+    background: checked ? color : "transparent",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    flexShrink: 0,
+    transition: "all 0.15s",
+  });
 
   return (
-    <div className="space-y-5">
-      {[TIER_ARENA_PASS, TIER_ARENA_ELITE].map((tier) => (
+    <div className="space-y-4">
+      {/* Tier cards */}
+      {[TIER_ARENA_FAN, TIER_ARENA_LEGEND].map((tier) => (
         <motion.div
           key={tier.name}
           className="rounded-2xl p-5"
@@ -233,7 +239,7 @@ function YearlyTiers({ isCreator }) {
                   lineHeight: 1,
                 }}
               >
-                {tier.name}
+                Tier {tier === TIER_ARENA_FAN ? "1" : "2"} — {tier.name}
               </h4>
               <p style={{ fontFamily: "'Montserrat',sans-serif", color: "#9ca3af", fontSize: "0.75rem" }}>
                 R {tier.price.toLocaleString()} / year
@@ -242,7 +248,7 @@ function YearlyTiers({ isCreator }) {
           </div>
 
           {/* Benefits checklist */}
-          <ul className="space-y-1.5 mb-4">
+          <ul className="space-y-1.5">
             {tier.benefits.map((b) => (
               <li key={b} className="flex items-start gap-2">
                 <span style={{ color: tier.color, fontSize: "0.8rem", marginTop: "0.15rem", flexShrink: 0 }}>✓</span>
@@ -250,74 +256,63 @@ function YearlyTiers({ isCreator }) {
               </li>
             ))}
           </ul>
-
-          {/* Requirements */}
-          <div
-            className="rounded-xl px-4 py-3 mb-4"
-            style={{ background: `${tier.color}0d`, border: `1px solid ${tier.color}20` }}
-          >
-            <p style={{ fontFamily: "'Montserrat',sans-serif", color: "#9ca3af", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
-              Requirements
-            </p>
-            <ul className="space-y-1">
-              {tier.requirements.map((r) => (
-                <li key={r} className="flex items-start gap-2">
-                  <span style={{ color: "#6b7280", fontSize: "0.75rem", marginTop: "0.1rem", flexShrink: 0 }}>•</span>
-                  <span style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.75rem" }}>
-                    {r === "Consent to data sharing" ? (
-                      <>
-                        Consent to data sharing —{" "}
-                        <a href="/terms" style={{ color: tier.color, textDecoration: "underline" }}>
-                          see Terms
-                        </a>
-                      </>
-                    ) : r}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* CTA buttons */}
-          <motion.a
-            href={kofiUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full text-center py-3 rounded-xl font-bold text-white text-sm mb-2"
-            style={{
-              fontFamily: "'Montserrat',sans-serif",
-              letterSpacing: "0.04em",
-              background: tier.gradient,
-              boxShadow: `0 6px 24px ${tier.glow}`,
-            }}
-            whileHover={{ y: -2, boxShadow: `0 10px 32px ${tier.glow}` }}
-            whileTap={{ scale: 0.97 }}
-          >
-            ☕ {tier.ctaLabel} via Ko-fi
-          </motion.a>
-          <motion.a
-            href={`https://www.paypal.me/osheenviews/${tier.price}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full text-center py-2.5 rounded-xl font-bold text-sm"
-            style={{
-              fontFamily: "'Montserrat',sans-serif",
-              letterSpacing: "0.04em",
-              background: "rgba(0,112,243,0.12)",
-              border: "1px solid rgba(0,112,243,0.35)",
-              color: "#60a5fa",
-            }}
-            whileHover={{ background: "rgba(0,112,243,0.22)", y: -2 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            🅿️ Pay R {tier.price.toLocaleString()} via PayPal
-          </motion.a>
         </motion.div>
       ))}
 
+      {/* Opt-in checkboxes */}
+      <div
+        className="rounded-2xl px-5 py-4 space-y-3"
+        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+      >
+        {[
+          { label: "I opt in to newsletter email updates", state: optNewsletter, set: setOptNewsletter },
+          { label: "I opt in to push notifications", state: optPush, set: setOptPush },
+          { label: "I consent to data processing for personalization", state: optData, set: setOptData },
+        ].map(({ label, state, set }) => (
+          <label key={label} className="flex items-center gap-3 cursor-pointer" onClick={() => set(!state)}>
+            <div style={checkboxStyle(state, "#22c55e")}>
+              {state && <span style={{ color: "#fff", fontSize: "0.65rem", lineHeight: 1 }}>✓</span>}
+            </div>
+            <span style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.82rem" }}>
+              {label}
+            </span>
+          </label>
+        ))}
+      </div>
+
+      {/* Animated CTA button */}
+      <motion.a
+        href={kofiUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-full text-center py-4 rounded-2xl font-bold text-white"
+        style={{
+          fontFamily: "'Bebas Neue',Impact,sans-serif",
+          fontSize: "1.25rem",
+          letterSpacing: "0.12em",
+          background: "linear-gradient(135deg,#15803d,#22c55e)",
+          boxShadow: "0 8px 32px rgba(34,197,94,0.5)",
+        }}
+        animate={{ boxShadow: ["0 8px 32px rgba(34,197,94,0.4)", "0 8px 48px rgba(34,197,94,0.75)", "0 8px 32px rgba(34,197,94,0.4)"] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        whileHover={{ y: -3, boxShadow: "0 14px 48px rgba(34,197,94,0.8)" }}
+        whileTap={{ scale: 0.97 }}
+      >
+        UNLOCK YEARLY BENEFITS
+      </motion.a>
+
       {/* T&C small print */}
-      <p className="text-center" style={{ fontFamily: "'Inter',sans-serif", color: "#4b5563", fontSize: "0.68rem", lineHeight: 1.6 }}>
-        By subscribing you agree to our{" "}
+      <p
+        className="text-center"
+        style={{
+          fontFamily: "'Arial Narrow',Arial,sans-serif",
+          color: "#6b7280",
+          fontSize: "9px",
+          lineHeight: 1.5,
+          letterSpacing: "0.01em",
+        }}
+      >
+        By clicking above you agree to our{" "}
         <a href="/terms" style={{ color: "#6b7280", textDecoration: "underline" }}>
           Terms &amp; Conditions
         </a>
@@ -1018,7 +1013,8 @@ export default function DonationsPage() {
                     exit={{ opacity: 0, x: 30 }}
                     transition={{ duration: 0.45 }}
                     style={{
-                      width: "calc(50vw - 0px)",
+                      width: "55vw",
+                      maxWidth: "750px",
                       minHeight: "calc(100vh - 120px)",
                       flexShrink: 0,
                       position: "relative",
@@ -1031,7 +1027,7 @@ export default function DonationsPage() {
                 {/* ── Right: donation widget, scrollable ── */}
                 <div
                   className="flex-1 flex items-start justify-center px-6 py-6 overflow-y-auto"
-                  style={{ maxWidth: "50vw" }}
+                  style={{ maxWidth: "45vw" }}
                 >
                   <div className="w-full max-w-md">
                     <AnimatePresence mode="wait">

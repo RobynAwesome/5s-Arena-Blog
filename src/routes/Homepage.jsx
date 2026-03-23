@@ -49,7 +49,7 @@ function useCounter(target, isInView) {
   return count;
 }
 
-/* ── Video Post Card — full-bleed 16/9 banner with hover-to-play ── */
+/* ── Video Post Card — full-bleed 21/9 banner with hover-to-play ── */
 function VideoPostCard({ post, index = 0 }) {
   const videoRef = useRef(null);
   const [hovered, setHovered] = useState(false);
@@ -67,7 +67,7 @@ function VideoPostCard({ post, index = 0 }) {
     <Link to={`/${post.slug}`}>
       <motion.div
         className="relative w-full rounded-xl overflow-hidden cursor-pointer"
-        style={{ aspectRatio: '16/9', background: '#000' }}
+        style={{ aspectRatio: '21/9', background: '#000' }}
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
         initial={{ opacity: 0, y: 24 }}
@@ -94,16 +94,16 @@ function VideoPostCard({ post, index = 0 }) {
           style={{ opacity: hovered ? 1 : 0 }}
         />
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)' }} />
+        {/* Dark gradient overlay at bottom */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 50%, transparent 100%)' }} />
 
-        {/* Top-left badge — Video / Playing */}
-        <div className="absolute top-2 left-2 z-10">
+        {/* Top-left badge — ▶ Video */}
+        <div className="absolute top-3 left-3 z-10">
           {hovered ? (
             <motion.span
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-1 bg-green-500 text-black text-xs font-bold px-2 py-0.5 rounded-full"
+              className="flex items-center gap-1 bg-green-500 text-black text-xs font-bold px-2.5 py-1 rounded-full"
               style={{ fontFamily: "'Montserrat',sans-serif" }}
             >
               <motion.span
@@ -114,30 +114,29 @@ function VideoPostCard({ post, index = 0 }) {
               Playing
             </motion.span>
           ) : (
-            <span className="flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full" style={{ fontFamily: "'Montserrat',sans-serif" }}>
-              <span className="inline-block w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[6px] border-l-white" />
-              Video
+            <span className="flex items-center gap-1.5 bg-red-600 text-white text-sm font-bold px-3 py-1 rounded-full" style={{ fontFamily: "'Montserrat',sans-serif" }}>
+              ▶ Video
             </span>
           )}
         </div>
 
         {/* Reading time badge */}
-        <span className="absolute top-2 right-2 z-10 text-white text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', fontFamily: "'Inter',sans-serif" }}>
+        <span className="absolute top-3 right-3 z-10 text-white text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', fontFamily: "'Inter',sans-serif" }}>
           {post.readingTime} min
         </span>
 
         {/* Center play icon — fades out on hover */}
         <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center pointer-events-none"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full flex items-center justify-center pointer-events-none"
           style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
           animate={{ opacity: hovered ? 0 : 1, scale: hovered ? 0.7 : 1 }}
           transition={{ duration: 0.3 }}
         >
-          <span className="inline-block w-0 h-0 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent border-l-[15px] border-l-white ml-1" />
+          <span className="inline-block w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[17px] border-l-white ml-1" />
         </motion.div>
 
         {/* Bottom content */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
+        <div className="absolute bottom-0 left-0 right-0 p-5">
           <span
             className="label-tag text-xs px-2 py-0.5 rounded-full text-white inline-block mb-2"
             style={{ background: 'linear-gradient(135deg,#b45309,#f59e0b)' }}
@@ -145,11 +144,11 @@ function VideoPostCard({ post, index = 0 }) {
             {post.category}
           </span>
           <h3
-            className="text-white line-clamp-2 leading-tight"
+            className="text-white line-clamp-2 leading-none"
             style={{
-              fontFamily: "'Oswald',sans-serif",
-              fontSize: '1rem',
-              textTransform: 'uppercase',
+              fontFamily: "'Bebas Neue',sans-serif",
+              fontSize: 'clamp(1.4rem, 3vw, 2rem)',
+              letterSpacing: '0.04em',
               color: hovered ? '#22c55e' : '#f9fafb',
               transition: 'color 0.25s',
             }}
@@ -167,7 +166,7 @@ function VideoPostCard({ post, index = 0 }) {
 
         {/* Green left border on hover */}
         <motion.div
-          className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl"
+          className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl"
           style={{ background: 'linear-gradient(to bottom, #22c55e, #06b6d4)' }}
           initial={{ scaleY: 0 }}
           animate={{ scaleY: hovered ? 1 : 0 }}
@@ -214,16 +213,16 @@ function StatsBar() {
 function VideoCyclingStrip() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [hoveredGrid, setHoveredGrid] = useState(null); // index hovered in grid, or null
+  const [hoveredSidebar, setHoveredSidebar] = useState(null); // index hovered in sidebar, or null
   const videoRef = useRef(null);
-  const gridVideoRefs = useRef([]); // refs for each grid card video
+  const sidebarVideoRefs = useRef([]); // refs for each sidebar card video
 
-  /* Main player auto-cycle */
+  /* Main player auto-cycle — pauses when main player is hovered OR sidebar is hovered */
   useEffect(() => {
-    if (paused) return;
+    if (paused || hoveredSidebar !== null) return;
     const t = setInterval(() => setActiveIdx(i => (i + 1) % videoPosts.length), 10000);
     return () => clearInterval(t);
-  }, [paused]);
+  }, [paused, hoveredSidebar]);
 
   /* Reset main player on active change */
   useEffect(() => {
@@ -233,25 +232,16 @@ function VideoCyclingStrip() {
     }
   }, [activeIdx]);
 
-  /* Auto-cycle grid highlight when no card is hovered */
-  useEffect(() => {
-    if (hoveredGrid !== null) return;
-    const t = setInterval(() => setActiveIdx(i => (i + 1) % videoPosts.length), 10000);
-    return () => clearInterval(t);
-  }, [hoveredGrid]);
-
-  /* Handle grid card hover — play that card's video inline */
-  const onGridEnter = (i) => {
-    setHoveredGrid(i);
-    setPaused(true);
-    const vid = gridVideoRefs.current[i];
+  /* Handle sidebar card hover — stop auto-cycling, play that card's video preview */
+  const onSidebarEnter = (i) => {
+    setHoveredSidebar(i);
+    const vid = sidebarVideoRefs.current[i];
     if (vid) vid.play().catch(() => {});
   };
 
-  const onGridLeave = (i) => {
-    setHoveredGrid(null);
-    setPaused(false);
-    const vid = gridVideoRefs.current[i];
+  const onSidebarLeave = (i) => {
+    setHoveredSidebar(null);
+    const vid = sidebarVideoRefs.current[i];
     if (vid) { vid.pause(); vid.currentTime = 0; }
   };
 
@@ -292,110 +282,100 @@ function VideoCyclingStrip() {
           </div>
         </motion.div>
 
-        {/* Right side — 2-column grid of video cards */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Right side — vertical list of larger preview cards */}
+        <div className="flex flex-col gap-3 overflow-y-auto" style={{ maxHeight: '360px' }}>
           {videoPosts.map((vp, i) => {
             const isActive   = i === activeIdx;
-            const isHovered  = i === hoveredGrid;
+            const isHovered  = i === hoveredSidebar;
             return (
               <motion.div
                 key={vp.id}
-                className="relative rounded-xl overflow-hidden cursor-pointer"
+                className="relative rounded-xl overflow-hidden cursor-pointer flex-shrink-0"
                 style={{
-                  aspectRatio: '16/9',
-                  background: '#000',
-                  border: `2px solid ${isActive ? 'rgba(34,197,94,0.7)' : 'rgba(255,255,255,0.06)'}`,
-                  boxShadow: isActive ? '0 0 16px rgba(34,197,94,0.35)' : 'none',
+                  border: `2px solid ${isActive ? 'rgba(34,197,94,0.8)' : 'rgba(255,255,255,0.06)'}`,
+                  boxShadow: isActive ? '0 0 18px rgba(34,197,94,0.45)' : 'none',
                   transition: 'border-color 0.3s, box-shadow 0.3s',
+                  background: '#000',
                 }}
                 onClick={() => { setActiveIdx(i); setPaused(false); }}
-                onMouseEnter={() => onGridEnter(i)}
-                onMouseLeave={() => onGridLeave(i)}
-                whileHover={{ scale: 1.03 }}
+                onMouseEnter={() => onSidebarEnter(i)}
+                onMouseLeave={() => onSidebarLeave(i)}
+                whileHover={{ scale: 1.02 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 22 }}
               >
-                {/* Thumbnail / video */}
-                <img
-                  src={vp.image}
-                  alt={vp.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
-                  style={{ opacity: isHovered ? 0 : 1 }}
-                />
-                <video
-                  ref={el => { gridVideoRefs.current[i] = el; }}
-                  src={vp.video}
-                  muted
-                  loop
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
-                  style={{ opacity: isHovered ? 1 : 0 }}
-                />
+                {/* Thumbnail area — fixed 140px height */}
+                <div className="relative w-full" style={{ height: '140px' }}>
+                  <img
+                    src={vp.image}
+                    alt={vp.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
+                    style={{ opacity: isHovered ? 0 : 1 }}
+                  />
+                  <video
+                    ref={el => { sidebarVideoRefs.current[i] = el; }}
+                    src={vp.video}
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
+                    style={{ opacity: isHovered ? 1 : 0 }}
+                  />
 
-                {/* Gradient overlay */}
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 60%)' }} />
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)' }} />
 
-                {/* Top badge */}
-                <div className="absolute top-1.5 left-1.5 z-10">
-                  <span
-                    className="text-white text-xs px-1.5 py-0.5 rounded-full font-bold"
-                    style={{ background: getCategoryGradientLocal(vp.category), fontFamily: "'Montserrat',sans-serif", fontSize: '0.6rem' }}
-                  >
-                    {vp.category}
-                  </span>
-                </div>
-
-                {/* Playing / Video indicator */}
-                <div className="absolute top-1.5 right-1.5 z-10">
-                  {isHovered ? (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex items-center gap-0.5 bg-green-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full"
-                      style={{ fontFamily: "'Montserrat',sans-serif", fontSize: '0.6rem' }}
-                    >
+                  {/* Top-left badge */}
+                  <div className="absolute top-2 left-2 z-10">
+                    {isHovered ? (
                       <motion.span
-                        className="inline-block w-1 h-1 rounded-full bg-black"
-                        animate={{ opacity: [1, 0.3, 1] }}
-                        transition={{ duration: 0.9, repeat: Infinity }}
-                      />
-                      Playing
-                    </motion.span>
-                  ) : (
-                    <span className="flex items-center gap-0.5 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full" style={{ fontFamily: "'Montserrat',sans-serif", fontSize: '0.6rem' }}>
-                      <span className="inline-block w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[5px] border-l-white" />
-                      Video
-                    </span>
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex items-center gap-0.5 bg-green-500 text-black text-xs font-bold px-2 py-0.5 rounded-full"
+                        style={{ fontFamily: "'Montserrat',sans-serif", fontSize: '0.65rem' }}
+                      >
+                        <motion.span
+                          className="inline-block w-1 h-1 rounded-full bg-black"
+                          animate={{ opacity: [1, 0.3, 1] }}
+                          transition={{ duration: 0.9, repeat: Infinity }}
+                        />
+                        Playing
+                      </motion.span>
+                    ) : (
+                      <span className="flex items-center gap-1 bg-red-600 text-white font-bold px-2 py-0.5 rounded-full" style={{ fontFamily: "'Montserrat',sans-serif", fontSize: '0.65rem' }}>
+                        ▶ Video
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Active green glow border pulse */}
+                  {isActive && (
+                    <motion.div
+                      className="absolute inset-0 rounded-xl pointer-events-none"
+                      style={{ border: '2px solid rgba(34,197,94,0.7)' }}
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    />
                   )}
                 </div>
 
-                {/* Bottom text */}
-                <div className="absolute bottom-0 left-0 right-0 p-2">
+                {/* Title below thumbnail */}
+                <div className="px-3 py-2.5" style={{ background: 'rgba(10,10,10,0.85)' }}>
                   <p
                     className="line-clamp-2 leading-tight"
                     style={{
-                      fontFamily: "'Oswald',sans-serif",
-                      fontSize: '0.72rem',
-                      textTransform: 'uppercase',
+                      fontFamily: "'Bebas Neue',sans-serif",
+                      fontSize: '0.95rem',
+                      letterSpacing: '0.03em',
                       color: isActive ? '#22c55e' : '#f9fafb',
                       transition: 'color 0.25s',
                     }}
                   >
                     {vp.title}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: '#9ca3af', fontFamily: "'Inter',sans-serif", fontSize: '0.6rem' }}>
-                    {vp.readingTime} min
+                  <p className="mt-0.5" style={{ color: '#9ca3af', fontFamily: "'Inter',sans-serif", fontSize: '0.65rem' }}>
+                    {vp.readingTime} min · {vp.category}
                   </p>
                 </div>
-
-                {/* Active green glow border overlay */}
-                {isActive && (
-                  <motion.div
-                    className="absolute inset-0 rounded-xl pointer-events-none"
-                    style={{ border: '2px solid rgba(34,197,94,0.6)' }}
-                    animate={{ opacity: [0.6, 1, 0.6] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                )}
               </motion.div>
             );
           })}

@@ -25,7 +25,7 @@ function Accordion({ title, icon, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <motion.div className="rounded-2xl overflow-hidden"
-      style={{ background: "rgba(17,24,39,0.8)", border: "1px solid rgba(255,255,255,0.06)", backdropFilter: "blur(8px)" }}>
+      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", backdropFilter: "blur(12px)" }}>
       <button onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-5 text-left transition-colors"
         style={{ background: "transparent" }}
@@ -91,6 +91,102 @@ const STATUS_PRESETS = [
   { type: "offline", label: "Offline", color: "#ef4444" },
 ];
 
+/* ── Inline Edit Modal ─────────────────────────────────────── */
+function EditProfileModal({ user, onSave, onClose }) {
+  const [name, setName] = useState(user?.name || "");
+  const [bio, setBio] = useState(user?.bio || "");
+  const [avatarUrl, setAvatarUrl] = useState(user?.image || "");
+  const fileRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setAvatarUrl(ev.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave({ name, bio, image: avatarUrl });
+  };
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={onClose}>
+      <motion.div
+        className="w-full max-w-md rounded-2xl p-6 space-y-4"
+        style={{ background: "rgba(17,24,39,0.95)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(16px)" }}
+        initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
+        onClick={e => e.stopPropagation()}>
+        <h2 style={{ fontFamily: "'Bebas Neue',Impact,sans-serif", fontSize: "1.6rem", color: "#f9fafb", letterSpacing: "0.05em" }}>
+          Edit Profile
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Avatar preview + upload */}
+          <div className="flex items-center gap-4">
+            <div
+              className="w-20 h-20 rounded-full overflow-hidden cursor-pointer flex-shrink-0"
+              style={{ border: "2px solid rgba(34,197,94,0.4)" }}
+              onClick={() => fileRef.current?.click()}>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-3xl" style={{ background: "rgba(34,197,94,0.15)" }}>👤</div>
+              )}
+            </div>
+            <div>
+              <button type="button" onClick={() => fileRef.current?.click()}
+                className="text-sm"
+                style={{ fontFamily: "'Montserrat',sans-serif", color: "#22c55e", textDecoration: "underline" }}>
+                Upload new photo
+              </button>
+              <p style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.75rem", marginTop: "0.25rem" }}>
+                JPG, PNG or GIF · max 5 MB
+              </p>
+            </div>
+            <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+          </div>
+
+          <div>
+            <label className="block text-xs mb-1" style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Display Name</label>
+            <input type="text" value={name} onChange={e => setName(e.target.value)} required
+              className="w-full px-4 py-3 rounded-xl outline-none text-sm"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }} />
+          </div>
+
+          <div>
+            <label className="block text-xs mb-1" style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Bio</label>
+            <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3}
+              placeholder="Tell readers a little about yourself..."
+              className="w-full px-4 py-3 rounded-xl outline-none text-sm resize-none"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }} />
+          </div>
+
+          <div className="flex gap-3 pt-1">
+            <motion.button type="submit"
+              className="btn-primary flex-1 py-2.5 rounded-xl font-semibold text-sm"
+              style={{ fontFamily: "'Montserrat',sans-serif" }}
+              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              Save Changes
+            </motion.button>
+            <motion.button type="button" onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl font-semibold text-sm"
+              style={{ fontFamily: "'Montserrat',sans-serif", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#9ca3af" }}
+              whileHover={{ background: "rgba(255,255,255,0.1)" }} whileTap={{ scale: 0.97 }}>
+              Cancel
+            </motion.button>
+          </div>
+        </form>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════ */
@@ -99,16 +195,43 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
+  /* ── Redirect if not logged in ── */
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    document.title = "Profile — 5s Arena Blog";
+    window.scrollTo(0, 0);
+  }, []);
+
   /* ── State ── */
-  const [editName, setEditName] = useState(user?.name || "");
-  const [editUsername, setEditUsername] = useState(user?.username || "");
-  const [birthday, setBirthday] = useState(user?.birthday || "");
-  const [phone, setPhone] = useState(user?.phone || "");
-  const [contactMethod, setContactMethod] = useState(user?.contactMethod || "Email");
-  const [newsletter, setNewsletter] = useState(user?.newsletter !== false);
-  const [autoPlay, setAutoPlay] = useState(user?.autoVideoPlay !== false);
-  const [profileImage, setProfileImage] = useState(user?.image || "");
+  const [editName, setEditName] = useState("");
+  const [editUsername, setEditUsername] = useState("");
+  const [birthday, setBirthday] = useState("");
+  const [phone, setPhone] = useState("");
+  const [contactMethod, setContactMethod] = useState("Email");
+  const [newsletter, setNewsletter] = useState(true);
+  const [autoPlay, setAutoPlay] = useState(true);
+  const [profileImage, setProfileImage] = useState("");
   const [saved, setSaved] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  /* Sync state when user loads */
+  useEffect(() => {
+    if (user) {
+      setEditName(user.name || "");
+      setEditUsername(user.username || "");
+      setBirthday(user.birthday || "");
+      setPhone(user.phone || "");
+      setContactMethod(user.contactMethod || "Email");
+      setNewsletter(user.newsletter !== false);
+      setAutoPlay(user.autoVideoPlay !== false);
+      setProfileImage(user.image || "");
+    }
+  }, [user]);
 
   /* Password */
   const [currentPw, setCurrentPw] = useState("");
@@ -139,12 +262,8 @@ export default function ProfilePage() {
     return s ? JSON.parse(s).visible !== false : true;
   });
 
-  useEffect(() => {
-    document.title = "Profile — 5s Arena Blog";
-    window.scrollTo(0, 0);
-  }, []);
-
-  if (!user) { navigate("/login"); return null; }
+  /* Render nothing while redirecting */
+  if (!user) return null;
 
   const isGoogleUser = user.provider === "google";
 
@@ -160,6 +279,15 @@ export default function ProfilePage() {
       autoVideoPlay: autoPlay,
       image: profileImage,
     });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  const handleEditModalSave = ({ name, bio, image }) => {
+    updateProfile({ name, bio, image });
+    setEditName(name);
+    setProfileImage(image);
+    setShowEditModal(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -196,7 +324,6 @@ export default function ProfilePage() {
   const handleStatusSave = () => {
     const data = { type: statusType, color: statusColor, label: customLabel, visible: showStatus };
     localStorage.setItem("5s_user_status", JSON.stringify(data));
-    // Save status history
     const hist = JSON.parse(localStorage.getItem("5s_status_history") || "[]");
     if (statusType === "custom" && customLabel) {
       const exists = hist.find(h => h.label === customLabel);
@@ -209,6 +336,11 @@ export default function ProfilePage() {
     setTimeout(() => setSaved(false), 2500);
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   const statusHistory = JSON.parse(localStorage.getItem("5s_status_history") || "[]");
 
   const roleGradient = isAdmin
@@ -217,8 +349,22 @@ export default function ProfilePage() {
     ? "linear-gradient(135deg,#059669,#22c55e)"
     : "linear-gradient(135deg,#374151,#6b7280)";
 
+  /* Author-link target: use username without @ prefix for query param */
+  const authorSlug = (user.username || user.name || "").replace(/^@/, "");
+
   return (
-    <div style={{ background: "var(--color-bg)", minHeight: "100vh" }}>
+    <div style={{ background: "#030712", minHeight: "100vh" }}>
+
+      {/* ── Edit Profile Modal ── */}
+      <AnimatePresence>
+        {showEditModal && (
+          <EditProfileModal
+            user={user}
+            onSave={handleEditModalSave}
+            onClose={() => setShowEditModal(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Header ── */}
       <div className="relative overflow-hidden py-16"
@@ -243,7 +389,6 @@ export default function ProfilePage() {
                   <span className="text-4xl">👤</span>
                 </div>
               )}
-              {/* Camera overlay */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ background: "rgba(0,0,0,0.6)" }}>
                 <span className="text-2xl">📷</span>
@@ -261,16 +406,166 @@ export default function ProfilePage() {
           <h1 style={{ fontFamily: "'Bebas Neue',Impact,sans-serif", fontSize: "2.5rem", color: "#f9fafb", letterSpacing: "0.05em" }}>
             {user.name}
           </h1>
-          <p style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.9rem", marginBottom: "0.5rem" }}>{user.email}</p>
+          {user.bio && (
+            <p style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.9rem", marginBottom: "0.5rem", maxWidth: "28rem", margin: "0 auto 0.5rem" }}>
+              {user.bio}
+            </p>
+          )}
+          <p style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.85rem", marginBottom: "0.75rem" }}>{user.email}</p>
           <span className="inline-block px-4 py-1 rounded-full text-xs font-bold"
             style={{ fontFamily: "'Montserrat',sans-serif", background: roleGradient, color: "#fff", letterSpacing: "0.08em", textTransform: "uppercase" }}>
             {user.role}
           </span>
+
+          {/* Quick action buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
+            {/* Edit Profile */}
+            <motion.button
+              onClick={() => setShowEditModal(true)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
+              style={{
+                fontFamily: "'Montserrat',sans-serif",
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                color: "#f9fafb",
+                letterSpacing: "0.04em",
+              }}
+              whileHover={{ scale: 1.05, background: "rgba(255,255,255,0.13)" }}
+              whileTap={{ scale: 0.95 }}>
+              ✏️ Edit Profile
+            </motion.button>
+
+            {/* My Articles */}
+            <Link to={`/posts?author=${encodeURIComponent(authorSlug)}`}>
+              <motion.button
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
+                style={{
+                  fontFamily: "'Montserrat',sans-serif",
+                  background: "rgba(34,197,94,0.12)",
+                  border: "1px solid rgba(34,197,94,0.3)",
+                  color: "#22c55e",
+                  letterSpacing: "0.04em",
+                }}
+                whileHover={{ scale: 1.05, background: "rgba(34,197,94,0.2)" }}
+                whileTap={{ scale: 0.95 }}>
+                📰 My Articles
+              </motion.button>
+            </Link>
+
+            {/* Author Dashboard (author only, not admin) */}
+            {isAuthor && !isAdmin && (
+              <Link to="/author">
+                <motion.button
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{
+                    fontFamily: "'Montserrat',sans-serif",
+                    background: "rgba(34,197,94,0.12)",
+                    border: "1px solid rgba(34,197,94,0.3)",
+                    color: "#22c55e",
+                    letterSpacing: "0.04em",
+                  }}
+                  whileHover={{ scale: 1.05, background: "rgba(34,197,94,0.2)" }}
+                  whileTap={{ scale: 0.95 }}>
+                  👨‍💻 Author Dashboard
+                </motion.button>
+              </Link>
+            )}
+
+            {/* Admin Panel */}
+            {isAdmin && (
+              <Link to="/admin">
+                <motion.button
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{
+                    fontFamily: "'Montserrat',sans-serif",
+                    background: "rgba(239,68,68,0.12)",
+                    border: "1px solid rgba(239,68,68,0.3)",
+                    color: "#f87171",
+                    letterSpacing: "0.04em",
+                  }}
+                  whileHover={{ scale: 1.05, background: "rgba(239,68,68,0.2)" }}
+                  whileTap={{ scale: 0.95 }}>
+                  ⚙️ Admin Panel
+                </motion.button>
+              </Link>
+            )}
+          </div>
         </motion.div>
       </div>
 
       {/* ── Content ── */}
       <div className="max-w-2xl mx-auto px-4 py-10 space-y-4">
+
+        {/* Role-based stats row */}
+        {(isAdmin || isAuthor) && (
+          <motion.div
+            className="rounded-2xl p-5"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", backdropFilter: "blur(12px)" }}
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <h3 style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
+              {isAdmin ? "Admin Overview" : "Writing Stats"}
+            </h3>
+            <div className="grid grid-cols-3 gap-4">
+              {isAdmin ? (
+                <>
+                  <div className="text-center">
+                    <div style={{ fontFamily: "'Bebas Neue',Impact,sans-serif", fontSize: "2rem", color: "#22c55e" }}>—</div>
+                    <div style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.75rem" }}>Total Users</div>
+                  </div>
+                  <div className="text-center">
+                    <div style={{ fontFamily: "'Bebas Neue',Impact,sans-serif", fontSize: "2rem", color: "#22c55e" }}>—</div>
+                    <div style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.75rem" }}>Total Posts</div>
+                  </div>
+                  <div className="text-center">
+                    <div style={{ fontFamily: "'Bebas Neue',Impact,sans-serif", fontSize: "2rem", color: "#22c55e" }}>—</div>
+                    <div style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.75rem" }}>Pending Apps</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-center">
+                    <div style={{ fontFamily: "'Bebas Neue',Impact,sans-serif", fontSize: "2rem", color: "#22c55e" }}>—</div>
+                    <div style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.75rem" }}>Articles</div>
+                  </div>
+                  <div className="text-center">
+                    <div style={{ fontFamily: "'Bebas Neue',Impact,sans-serif", fontSize: "2rem", color: "#22c55e" }}>—</div>
+                    <div style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.75rem" }}>Total Views</div>
+                  </div>
+                  <div className="text-center">
+                    <div style={{ fontFamily: "'Bebas Neue',Impact,sans-serif", fontSize: "2rem", color: "#22c55e" }}>—</div>
+                    <div style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.75rem" }}>Comments</div>
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Reading history / newsletter status (all users) */}
+        {!isAdmin && !isAuthor && (
+          <motion.div
+            className="rounded-2xl p-5"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", backdropFilter: "blur(12px)" }}
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <h3 style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
+              Reader Overview
+            </h3>
+            <div className="flex items-center justify-between">
+              <div style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.85rem" }}>
+                Newsletter
+              </div>
+              <span className="px-3 py-1 rounded-full text-xs font-bold"
+                style={{
+                  fontFamily: "'Montserrat',sans-serif",
+                  background: newsletter ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.12)",
+                  color: newsletter ? "#22c55e" : "#f87171",
+                  border: newsletter ? "1px solid rgba(34,197,94,0.3)" : "1px solid rgba(239,68,68,0.3)",
+                }}>
+                {newsletter ? "Subscribed" : "Not subscribed"}
+              </span>
+            </div>
+          </motion.div>
+        )}
 
         {/* Profile Info */}
         <Accordion title="Profile Information" icon="👤" defaultOpen>
@@ -279,14 +574,14 @@ export default function ProfilePage() {
               <label className="block text-xs mb-1" style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Display Name</label>
               <input type="text" value={editName} onChange={e => setEditName(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }} />
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }} />
             </div>
             <div>
               <label className="block text-xs mb-1" style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Username</label>
               <input type="text" value={editUsername} onChange={e => setEditUsername(e.target.value)}
                 placeholder="@username"
                 className="w-full px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }} />
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }} />
             </div>
             <div>
               <label className="block text-xs mb-1" style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Email</label>
@@ -298,7 +593,7 @@ export default function ProfilePage() {
               <label className="block text-xs mb-1" style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Birthday</label>
               <input type="date" value={birthday} onChange={e => setBirthday(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif", colorScheme: "dark" }} />
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "#f9fafb", fontFamily: "'Inter',sans-serif", colorScheme: "dark" }} />
             </div>
             <motion.button onClick={handleSave}
               className="btn-primary px-6 py-2.5 rounded-xl font-semibold text-sm"
@@ -317,7 +612,7 @@ export default function ProfilePage() {
                 <label className="block text-xs mb-1" style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Current Password</label>
                 <input type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl outline-none text-sm"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
                   required />
               </div>
             )}
@@ -325,14 +620,14 @@ export default function ProfilePage() {
               <label className="block text-xs mb-1" style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>New Password</label>
               <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
                 required minLength={6} />
             </div>
             <div>
               <label className="block text-xs mb-1" style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Confirm Password</label>
               <input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
                 required />
             </div>
             {pwMsg && (
@@ -343,7 +638,7 @@ export default function ProfilePage() {
             <motion.button type="submit"
               className="px-6 py-2.5 rounded-xl font-semibold text-sm"
               style={{ fontFamily: "'Montserrat',sans-serif", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", color: "#f9fafb" }}
-              whileHover={{ background: "rgba(255,255,255,0.1)" }}>
+              whileHover={{ background: "rgba(255,255,255,0.1)" }} whileTap={{ scale: 0.97 }}>
               Update Password
             </motion.button>
           </form>
@@ -357,7 +652,7 @@ export default function ProfilePage() {
               <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                 placeholder="+27 63 782 0245"
                 className="w-full px-4 py-3 rounded-xl outline-none text-sm"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }} />
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }} />
             </div>
             <div>
               <label className="block text-xs mb-2" style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Preferred Contact</label>
@@ -383,7 +678,7 @@ export default function ProfilePage() {
             <motion.button onClick={() => { updateProfile({ autoVideoPlay: autoPlay }); setSaved(true); setTimeout(() => setSaved(false), 2500); }}
               className="px-5 py-2 rounded-xl font-semibold text-sm"
               style={{ fontFamily: "'Montserrat',sans-serif", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", color: "#d1d5db" }}
-              whileHover={{ background: "rgba(255,255,255,0.1)" }}>
+              whileHover={{ background: "rgba(255,255,255,0.1)" }} whileTap={{ scale: 0.97 }}>
               Save Preference
             </motion.button>
           </div>
@@ -429,7 +724,7 @@ export default function ProfilePage() {
                   onChange={e => { setCustomLabel(e.target.value); setStatusType("custom"); }}
                   placeholder="e.g. Writing an article..."
                   className="flex-1 px-4 py-2.5 rounded-xl outline-none text-sm"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }} />
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }} />
                 <input type="color" value={statusColor}
                   onChange={e => { setStatusColor(e.target.value); setStatusType("custom"); }}
                   className="w-10 h-10 rounded-lg cursor-pointer border-0 p-0"
@@ -495,7 +790,7 @@ export default function ProfilePage() {
                     </label>
                     <textarea value={appReason} onChange={e => setAppReason(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl outline-none text-sm resize-none h-24"
-                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
+                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
                       placeholder="Tell us about your passion for football writing..." required />
                   </div>
                   <div>
@@ -504,7 +799,7 @@ export default function ProfilePage() {
                     </label>
                     <input type="text" value={appSample} onChange={e => setAppSample(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl outline-none text-sm"
-                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
+                      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
                       placeholder="e.g. The Evolution of Pressing in Modern Football" required />
                   </div>
                   <motion.button type="submit"
@@ -519,12 +814,13 @@ export default function ProfilePage() {
           </Accordion>
         )}
 
-        {/* Author Dashboard link */}
+        {/* Author Dashboard card (author only) */}
         {isAuthor && !isAdmin && (
           <Link to="/author">
             <motion.div className="rounded-2xl p-5 flex items-center justify-between"
               style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)" }}
-              whileHover={{ background: "rgba(34,197,94,0.12)" }}>
+              whileHover={{ background: "rgba(34,197,94,0.12)" }}
+              whileTap={{ scale: 0.98 }}>
               <span className="flex items-center gap-3">
                 <span className="text-xl">👨‍💻</span>
                 <span style={{ fontFamily: "'Oswald',sans-serif", color: "#22c55e", textTransform: "uppercase", letterSpacing: "0.05em" }}>Author Dashboard</span>
@@ -534,12 +830,13 @@ export default function ProfilePage() {
           </Link>
         )}
 
-        {/* Admin link */}
+        {/* Admin Dashboard card */}
         {isAdmin && (
           <Link to="/admin">
             <motion.div className="rounded-2xl p-5 flex items-center justify-between"
               style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}
-              whileHover={{ background: "rgba(239,68,68,0.12)" }}>
+              whileHover={{ background: "rgba(239,68,68,0.12)" }}
+              whileTap={{ scale: 0.98 }}>
               <span className="flex items-center gap-3">
                 <span className="text-xl">⚙️</span>
                 <span style={{ fontFamily: "'Oswald',sans-serif", color: "#f87171", textTransform: "uppercase", letterSpacing: "0.05em" }}>Admin Dashboard</span>
@@ -551,7 +848,7 @@ export default function ProfilePage() {
 
         {/* Logout */}
         <motion.button
-          onClick={() => { logout(); navigate("/"); }}
+          onClick={handleLogout}
           className="w-full py-3.5 rounded-2xl font-semibold text-sm"
           style={{
             fontFamily: "'Montserrat',sans-serif",
@@ -561,7 +858,8 @@ export default function ProfilePage() {
             textTransform: "uppercase",
             letterSpacing: "0.05em",
           }}
-          whileHover={{ background: "rgba(239,68,68,0.15)" }}>
+          whileHover={{ background: "rgba(239,68,68,0.15)" }}
+          whileTap={{ scale: 0.97 }}>
           Sign Out
         </motion.button>
       </div>
