@@ -56,7 +56,7 @@ function LightBeam({ angle, color, delay }) {
 }
 
 const WELCOME_COLORS = ["#22c55e", "#06b6d4", "#f59e0b", "#a855f7", "#ef4444"];
-const NAME_LETTERS = "ROBYN".split("");
+const NAME_LETTERS = "KHOLOFELO".split("");
 const TAGLINE = "Web Designer · Football Fan · Digital Architect";
 
 function WelcomeAnimation({ onComplete }) {
@@ -354,8 +354,8 @@ export default function CreatorPage() {
                 <motion.h1
                   style={{
                     fontFamily: "'Bebas Neue',Impact,sans-serif",
-                    fontSize: "clamp(3rem,10vw,6rem)",
-                    letterSpacing: "0.06em",
+                    fontSize: "clamp(2rem,8vw,5rem)",
+                    letterSpacing: "0.04em",
                     lineHeight: 1,
                     marginBottom: "0.5rem",
                   }}
@@ -363,8 +363,8 @@ export default function CreatorPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
                 >
-                  <span style={{ color: "#a855f7" }}>ROBYN</span>{" "}
-                  <span style={{ color: "#f9fafb" }}>AWESOME</span>
+                  <span style={{ color: "#a855f7" }}>KHOLOFELO ROBYN</span>{" "}
+                  <span style={{ color: "#f9fafb" }}>RABABALELA</span>
                 </motion.h1>
 
                 {/* Role */}
