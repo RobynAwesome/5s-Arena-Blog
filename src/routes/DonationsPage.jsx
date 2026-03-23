@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from "framer-motion";
 import PageGateLoader from "@/components/PageGateLoader";
-import BottomNavBar from "@/components/BottomNavBar";
 
 /* ── Donation targets ─────────────────────────────────────── */
 const WEBSITE_AMOUNTS = [4000, 2000, 1000, 400, 200, 100];
@@ -50,7 +49,7 @@ function ImageCycler({ slides }) {
   }, [slides.length]);
 
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-2xl" style={{ minHeight: 400 }}>
+    <div className="relative w-full h-full overflow-hidden" style={{ minHeight: 480 }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={current}
@@ -160,12 +159,179 @@ function AnimatedTitle() {
   );
 }
 
+/* ── Yearly tier data ─────────────────────────────────────── */
+const TIER_ARENA_PASS = {
+  name: "Arena Pass",
+  price: 1200,
+  color: "#22c55e",
+  gradient: "linear-gradient(135deg,#15803d,#22c55e)",
+  glow: "rgba(34,197,94,0.4)",
+  icon: "🏟️",
+  benefits: [
+    "Early access to articles",
+    "Monthly newsletter",
+    "Author badge on comments",
+    "Ad-free reading",
+    "Priority WhatsApp support",
+  ],
+  requirements: [
+    "Opt in to newsletter email updates",
+    "Enable push notifications",
+  ],
+  ctaLabel: "Subscribe — R 1,200/yr",
+};
+
+const TIER_ARENA_ELITE = {
+  name: "Arena Elite",
+  price: 2400,
+  color: "#a855f7",
+  gradient: "linear-gradient(135deg,#7c3aed,#f59e0b)",
+  glow: "rgba(168,85,247,0.4)",
+  icon: "⭐",
+  benefits: [
+    "All Arena Pass benefits",
+    "Exclusive video content",
+    "Direct author Q&A access",
+    "Featured supporter badge",
+    "Analytics insights newsletter",
+    "Data partnership opt-in (personalized content)",
+  ],
+  requirements: [
+    "All Arena Pass requirements",
+    "Consent to data sharing",
+  ],
+  ctaLabel: "Subscribe — R 2,400/yr",
+};
+
+/* ── Yearly tiers panel ──────────────────────────────────── */
+function YearlyTiers({ isCreator }) {
+  const kofiUrl = "https://ko-fi.com/robynawesome";
+
+  return (
+    <div className="space-y-5">
+      {[TIER_ARENA_PASS, TIER_ARENA_ELITE].map((tier) => (
+        <motion.div
+          key={tier.name}
+          className="rounded-2xl p-5"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: `1px solid ${tier.color}30`,
+            boxShadow: `0 0 24px ${tier.glow}20`,
+          }}
+          whileHover={{ y: -2, boxShadow: `0 8px 32px ${tier.glow}30` }}
+        >
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-3">
+            <span style={{ fontSize: "1.6rem" }}>{tier.icon}</span>
+            <div>
+              <h4
+                style={{
+                  fontFamily: "'Bebas Neue',sans-serif",
+                  fontSize: "1.3rem",
+                  letterSpacing: "0.06em",
+                  color: tier.color,
+                  lineHeight: 1,
+                }}
+              >
+                {tier.name}
+              </h4>
+              <p style={{ fontFamily: "'Montserrat',sans-serif", color: "#9ca3af", fontSize: "0.75rem" }}>
+                R {tier.price.toLocaleString()} / year
+              </p>
+            </div>
+          </div>
+
+          {/* Benefits checklist */}
+          <ul className="space-y-1.5 mb-4">
+            {tier.benefits.map((b) => (
+              <li key={b} className="flex items-start gap-2">
+                <span style={{ color: tier.color, fontSize: "0.8rem", marginTop: "0.15rem", flexShrink: 0 }}>✓</span>
+                <span style={{ fontFamily: "'Inter',sans-serif", color: "#d1d5db", fontSize: "0.8rem" }}>{b}</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Requirements */}
+          <div
+            className="rounded-xl px-4 py-3 mb-4"
+            style={{ background: `${tier.color}0d`, border: `1px solid ${tier.color}20` }}
+          >
+            <p style={{ fontFamily: "'Montserrat',sans-serif", color: "#9ca3af", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
+              Requirements
+            </p>
+            <ul className="space-y-1">
+              {tier.requirements.map((r) => (
+                <li key={r} className="flex items-start gap-2">
+                  <span style={{ color: "#6b7280", fontSize: "0.75rem", marginTop: "0.1rem", flexShrink: 0 }}>•</span>
+                  <span style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.75rem" }}>
+                    {r === "Consent to data sharing" ? (
+                      <>
+                        Consent to data sharing —{" "}
+                        <a href="/terms" style={{ color: tier.color, textDecoration: "underline" }}>
+                          see Terms
+                        </a>
+                      </>
+                    ) : r}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* CTA buttons */}
+          <motion.a
+            href={kofiUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full text-center py-3 rounded-xl font-bold text-white text-sm mb-2"
+            style={{
+              fontFamily: "'Montserrat',sans-serif",
+              letterSpacing: "0.04em",
+              background: tier.gradient,
+              boxShadow: `0 6px 24px ${tier.glow}`,
+            }}
+            whileHover={{ y: -2, boxShadow: `0 10px 32px ${tier.glow}` }}
+            whileTap={{ scale: 0.97 }}
+          >
+            ☕ {tier.ctaLabel} via Ko-fi
+          </motion.a>
+          <motion.a
+            href={`https://www.paypal.me/osheenviews/${tier.price}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full text-center py-2.5 rounded-xl font-bold text-sm"
+            style={{
+              fontFamily: "'Montserrat',sans-serif",
+              letterSpacing: "0.04em",
+              background: "rgba(0,112,243,0.12)",
+              border: "1px solid rgba(0,112,243,0.35)",
+              color: "#60a5fa",
+            }}
+            whileHover={{ background: "rgba(0,112,243,0.22)", y: -2 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            🅿️ Pay R {tier.price.toLocaleString()} via PayPal
+          </motion.a>
+        </motion.div>
+      ))}
+
+      {/* T&C small print */}
+      <p className="text-center" style={{ fontFamily: "'Inter',sans-serif", color: "#4b5563", fontSize: "0.68rem", lineHeight: 1.6 }}>
+        By subscribing you agree to our{" "}
+        <a href="/terms" style={{ color: "#6b7280", textDecoration: "underline" }}>
+          Terms &amp; Conditions
+        </a>
+      </p>
+    </div>
+  );
+}
+
 /* ── Donation widget ─────────────────────────────────────── */
 function DonationWidget({ mode }) {
   const isCreator = mode === "creator";
   const amounts = isCreator ? CREATOR_AMOUNTS : WEBSITE_AMOUNTS;
   const [selectedAmt, setSelectedAmt] = useState(amounts[4]);
-  const [payType, setPayType] = useState("once"); // once | monthly
+  const [payType, setPayType] = useState("once"); // once | monthly | yearly
   const [customAmt, setCustomAmt] = useState("");
   const [dedicated, setDedicated] = useState(false);
   const [comment, setComment] = useState(false);
@@ -188,18 +354,22 @@ function DonationWidget({ mode }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.3 }}
     >
-      {/* One-time / Monthly tabs */}
-      <div className="flex gap-2 mb-6 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.05)" }}>
-        {[["once", "One-time"], ["monthly", "Monthly ♥"]].map(([val, label]) => (
+      {/* One-time / Monthly / Yearly tabs */}
+      <div className="flex gap-1.5 mb-6 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.05)" }}>
+        {[["once", "One-time"], ["monthly", "Monthly ♥"], ["yearly", "Yearly ⭐"]].map(([val, label]) => (
           <button
             key={val}
             onClick={() => setPayType(val)}
-            className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+            className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
             style={{
               fontFamily: "'Montserrat',sans-serif",
-              background: payType === val ? (isCreator ? "#a855f7" : "#22c55e") : "transparent",
+              background: payType === val ? (val === "yearly" ? "linear-gradient(135deg,#7c3aed,#f59e0b)" : isCreator ? "#a855f7" : "#22c55e") : "transparent",
               color: payType === val ? "#fff" : "#9ca3af",
-              boxShadow: payType === val ? `0 0 16px ${isCreator ? "#a855f7" : "#22c55e"}40` : "none",
+              boxShadow: payType === val
+                ? val === "yearly"
+                  ? "0 0 16px rgba(168,85,247,0.4)"
+                  : `0 0 16px ${isCreator ? "#a855f7" : "#22c55e"}40`
+                : "none",
               border: "none",
             }}
           >
@@ -208,141 +378,148 @@ function DonationWidget({ mode }) {
         ))}
       </div>
 
-      <p style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.85rem", marginBottom: "1rem", textAlign: "center" }}>
-        Your donation supports {isCreator ? "the creator" : "our mission"}
-      </p>
+      {/* Yearly tiers view */}
+      {payType === "yearly" ? (
+        <YearlyTiers isCreator={isCreator} />
+      ) : (
+        <>
+          <p style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.85rem", marginBottom: "1rem", textAlign: "center" }}>
+            Your donation supports {isCreator ? "the creator" : "our mission"}
+          </p>
 
-      {/* Amount grid */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        {amounts.map((amt) => (
-          <motion.button
-            key={amt}
-            onClick={() => { setSelectedAmt(amt); setCustomAmt(""); }}
-            className="py-3 rounded-xl text-sm font-bold transition-all"
-            style={{
-              fontFamily: "'Bebas Neue',sans-serif",
-              fontSize: "1rem",
-              letterSpacing: "0.05em",
-              background: selectedAmt === amt && !customAmt
-                ? (isCreator ? "rgba(168,85,247,0.25)" : "rgba(34,197,94,0.25)")
-                : "rgba(255,255,255,0.05)",
-              border: selectedAmt === amt && !customAmt
-                ? `1px solid ${isCreator ? "#a855f7" : "#22c55e"}`
-                : "1px solid rgba(255,255,255,0.08)",
-              color: selectedAmt === amt && !customAmt
-                ? (isCreator ? "#a855f7" : "#22c55e")
-                : "#d1d5db",
-              boxShadow: selectedAmt === amt && !customAmt
-                ? `0 0 12px ${isCreator ? "#a855f7" : "#22c55e"}30`
-                : "none",
-            }}
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-          >
-            R {amt.toLocaleString()}
-          </motion.button>
-        ))}
-      </div>
-
-      {/* Custom amount input */}
-      <div
-        className="flex items-center gap-2 px-4 py-3 rounded-xl mb-4"
-        style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${customAmt ? (isCreator ? "#a855f7" : "#22c55e") : "rgba(255,255,255,0.1)"}` }}
-      >
-        <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: "1.1rem", color: isCreator ? "#a855f7" : "#22c55e" }}>R</span>
-        <input
-          type="number"
-          value={customAmt}
-          onChange={(e) => setCustomAmt(e.target.value)}
-          placeholder={selectedAmt.toString()}
-          className="flex-1 bg-transparent outline-none text-xl font-bold"
-          style={{ fontFamily: "'Bebas Neue',sans-serif", color: "#f9fafb", letterSpacing: "0.05em" }}
-        />
-        <span style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", fontSize: "0.75rem" }}>ZAR</span>
-      </div>
-
-      {/* Dedicate + Comment */}
-      <div className="space-y-3 mb-6">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <div
-            onClick={() => setDedicated(!dedicated)}
-            className="w-4 h-4 rounded border-2 flex items-center justify-center transition-all"
-            style={{
-              borderColor: dedicated ? (isCreator ? "#a855f7" : "#22c55e") : "rgba(255,255,255,0.3)",
-              background: dedicated ? (isCreator ? "#a855f7" : "#22c55e") : "transparent",
-            }}
-          >
-            {dedicated && <span className="text-white text-xs">✓</span>}
+          {/* Amount grid */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {amounts.map((amt) => (
+              <motion.button
+                key={amt}
+                onClick={() => { setSelectedAmt(amt); setCustomAmt(""); }}
+                className="py-3 rounded-xl text-sm font-bold transition-all"
+                style={{
+                  fontFamily: "'Bebas Neue',sans-serif",
+                  fontSize: "1rem",
+                  letterSpacing: "0.05em",
+                  background: selectedAmt === amt && !customAmt
+                    ? (isCreator ? "rgba(168,85,247,0.25)" : "rgba(34,197,94,0.25)")
+                    : "rgba(255,255,255,0.05)",
+                  border: selectedAmt === amt && !customAmt
+                    ? `1px solid ${isCreator ? "#a855f7" : "#22c55e"}`
+                    : "1px solid rgba(255,255,255,0.08)",
+                  color: selectedAmt === amt && !customAmt
+                    ? (isCreator ? "#a855f7" : "#22c55e")
+                    : "#d1d5db",
+                  boxShadow: selectedAmt === amt && !customAmt
+                    ? `0 0 12px ${isCreator ? "#a855f7" : "#22c55e"}30`
+                    : "none",
+                }}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+              >
+                R {amt.toLocaleString()}
+              </motion.button>
+            ))}
           </div>
-          <span style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.85rem" }}>
-            Dedicate this donation
-          </span>
-        </label>
-        <button
-          onClick={() => setComment(!comment)}
-          style={{ fontFamily: "'Inter',sans-serif", color: isCreator ? "#a855f7" : "#22c55e", fontSize: "0.85rem", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
-        >
-          {comment ? "Hide comment" : "Add comment"}
-        </button>
-        <AnimatePresence>
-          {comment && (
-            <motion.textarea
-              rows={2}
-              placeholder="Leave a message..."
-              className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+
+          {/* Custom amount input */}
+          <div
+            className="flex items-center gap-2 px-4 py-3 rounded-xl mb-4"
+            style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${customAmt ? (isCreator ? "#a855f7" : "#22c55e") : "rgba(255,255,255,0.1)"}` }}
+          >
+            <span style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: "1.1rem", color: isCreator ? "#a855f7" : "#22c55e" }}>R</span>
+            <input
+              type="number"
+              value={customAmt}
+              onChange={(e) => setCustomAmt(e.target.value)}
+              placeholder={selectedAmt.toString()}
+              className="flex-1 bg-transparent outline-none text-xl font-bold"
+              style={{ fontFamily: "'Bebas Neue',sans-serif", color: "#f9fafb", letterSpacing: "0.05em" }}
             />
-          )}
-        </AnimatePresence>
-      </div>
+            <span style={{ fontFamily: "'Montserrat',sans-serif", color: "#6b7280", fontSize: "0.75rem" }}>ZAR</span>
+          </div>
 
-      {/* CTA buttons */}
-      <div className="space-y-3">
-        <motion.a
-          href={kofiUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full text-center py-4 rounded-2xl font-bold text-white text-sm"
-          style={{
-            fontFamily: "'Montserrat',sans-serif",
-            letterSpacing: "0.05em",
-            background: isCreator
-              ? "linear-gradient(135deg,#7c3aed,#a855f7)"
-              : "linear-gradient(135deg,#15803d,#22c55e)",
-            boxShadow: `0 8px 32px ${isCreator ? "rgba(168,85,247,0.4)" : "rgba(34,197,94,0.4)"}`,
-          }}
-          whileHover={{ y: -2, boxShadow: `0 12px 40px ${isCreator ? "rgba(168,85,247,0.6)" : "rgba(34,197,94,0.6)"}` }}
-          whileTap={{ scale: 0.97 }}
-        >
-          ☕ Donate via Ko-fi — R {finalAmt.toLocaleString()}
-        </motion.a>
-        <motion.a
-          href={paypalUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full text-center py-3.5 rounded-2xl font-bold text-sm"
-          style={{
-            fontFamily: "'Montserrat',sans-serif",
-            letterSpacing: "0.05em",
-            background: "rgba(0,112,243,0.15)",
-            border: "1px solid rgba(0,112,243,0.4)",
-            color: "#60a5fa",
-            boxShadow: "0 4px 16px rgba(0,112,243,0.2)",
-          }}
-          whileHover={{ background: "rgba(0,112,243,0.25)", y: -2 }}
-          whileTap={{ scale: 0.97 }}
-        >
-          🅿️ Donate via PayPal
-        </motion.a>
-      </div>
+          {/* Dedicate + Comment */}
+          <div className="space-y-3 mb-6">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div
+                onClick={() => setDedicated(!dedicated)}
+                className="w-4 h-4 rounded border-2 flex items-center justify-center transition-all"
+                style={{
+                  borderColor: dedicated ? (isCreator ? "#a855f7" : "#22c55e") : "rgba(255,255,255,0.3)",
+                  background: dedicated ? (isCreator ? "#a855f7" : "#22c55e") : "transparent",
+                }}
+              >
+                {dedicated && <span className="text-white text-xs">✓</span>}
+              </div>
+              <span style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.85rem" }}>
+                Dedicate this donation
+              </span>
+            </label>
+            <button
+              onClick={() => setComment(!comment)}
+              style={{ fontFamily: "'Inter',sans-serif", color: isCreator ? "#a855f7" : "#22c55e", fontSize: "0.85rem", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
+            >
+              {comment ? "Hide comment" : "Add comment"}
+            </button>
+            <AnimatePresence>
+              {comment && (
+                <motion.textarea
+                  rows={2}
+                  placeholder="Leave a message..."
+                  className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
+                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                />
+              )}
+            </AnimatePresence>
+          </div>
 
-      {/* Secure note */}
-      <p className="text-center mt-4" style={{ fontFamily: "'Inter',sans-serif", color: "#374151", fontSize: "0.7rem" }}>
-        🔒 Secure • 100% goes to {isCreator ? "the creator" : "the website"} • Thank you! ⚽
-      </p>
+          {/* CTA buttons */}
+          <div className="space-y-3">
+            <motion.a
+              href={kofiUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full text-center py-4 rounded-2xl font-bold text-white text-sm"
+              style={{
+                fontFamily: "'Montserrat',sans-serif",
+                letterSpacing: "0.05em",
+                background: isCreator
+                  ? "linear-gradient(135deg,#7c3aed,#a855f7)"
+                  : "linear-gradient(135deg,#15803d,#22c55e)",
+                boxShadow: `0 8px 32px ${isCreator ? "rgba(168,85,247,0.4)" : "rgba(34,197,94,0.4)"}`,
+              }}
+              whileHover={{ y: -2, boxShadow: `0 12px 40px ${isCreator ? "rgba(168,85,247,0.6)" : "rgba(34,197,94,0.6)"}` }}
+              whileTap={{ scale: 0.97 }}
+            >
+              ☕ Donate via Ko-fi — R {finalAmt.toLocaleString()}
+            </motion.a>
+            <motion.a
+              href={paypalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full text-center py-3.5 rounded-2xl font-bold text-sm"
+              style={{
+                fontFamily: "'Montserrat',sans-serif",
+                letterSpacing: "0.05em",
+                background: "rgba(0,112,243,0.15)",
+                border: "1px solid rgba(0,112,243,0.4)",
+                color: "#60a5fa",
+                boxShadow: "0 4px 16px rgba(0,112,243,0.2)",
+              }}
+              whileHover={{ background: "rgba(0,112,243,0.25)", y: -2 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              🅿️ Donate via PayPal
+            </motion.a>
+          </div>
+
+          {/* Secure note */}
+          <p className="text-center mt-4" style={{ fontFamily: "'Inter',sans-serif", color: "#374151", fontSize: "0.7rem" }}>
+            🔒 Secure • 100% goes to {isCreator ? "the creator" : "the website"} • Thank you! ⚽
+          </p>
+        </>
+      )}
     </motion.div>
   );
 }
@@ -795,65 +972,80 @@ export default function DonationsPage() {
               </div>
             </section>
 
-            {/* ══ SECTION 2 — DONATION WIDGET + IMAGE CYCLER ═════ */}
-            <section id="donate-section" className="py-16 px-4" style={{ background: "var(--color-bg)" }}>
-              <div className="max-w-6xl mx-auto">
+            {/* ══ SECTION 2 — DONATION HERO: FULL-BLEED IMAGE | WIDGET ═ */}
+            <section
+              id="donate-section"
+              className="relative"
+              style={{ background: "var(--color-bg)", minHeight: "100vh" }}
+            >
+              {/* Mode switcher — centred above the split */}
+              <div className="flex gap-3 justify-center pt-10 pb-6 px-4 relative z-10">
+                {[
+                  { val: "website", label: "🏟️ Support the Website", color: "#22c55e" },
+                  { val: "creator", label: "🎨 Support the Creator", color: "#a855f7" },
+                ].map(({ val, label, color }) => (
+                  <motion.button
+                    key={val}
+                    onClick={() => setMode(val)}
+                    className="px-6 py-3 rounded-2xl font-bold text-sm"
+                    style={{
+                      fontFamily: "'Montserrat',sans-serif",
+                      letterSpacing: "0.04em",
+                      background: mode === val ? `${color}20` : "rgba(255,255,255,0.04)",
+                      border: mode === val ? `1.5px solid ${color}` : "1.5px solid rgba(255,255,255,0.08)",
+                      color: mode === val ? color : "#9ca3af",
+                      boxShadow: mode === val ? `0 0 20px ${color}30` : "none",
+                    }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    {label}
+                  </motion.button>
+                ))}
+              </div>
 
-                {/* Mode switcher — Website vs Creator */}
-                <div className="flex gap-3 justify-center mb-10">
-                  {[
-                    { val: "website", label: "🏟️ Support the Website", color: "#22c55e" },
-                    { val: "creator", label: "🎨 Support the Creator", color: "#a855f7" },
-                  ].map(({ val, label, color }) => (
-                    <motion.button
-                      key={val}
-                      onClick={() => setMode(val)}
-                      className="px-6 py-3 rounded-2xl font-bold text-sm"
-                      style={{
-                        fontFamily: "'Montserrat',sans-serif",
-                        letterSpacing: "0.04em",
-                        background: mode === val ? `${color}20` : "rgba(255,255,255,0.04)",
-                        border: mode === val ? `1.5px solid ${color}` : "1.5px solid rgba(255,255,255,0.08)",
-                        color: mode === val ? color : "#9ca3af",
-                        boxShadow: mode === val ? `0 0 20px ${color}30` : "none",
-                      }}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      {label}
-                    </motion.button>
-                  ))}
-                </div>
+              {/* Full-bleed split: left = image cycler, right = widget */}
+              <div
+                className="flex"
+                style={{ minHeight: "calc(100vh - 120px)" }}
+              >
+                {/* ── Left: full-bleed image cycler (50vw) ── */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={mode + "-image"}
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 30 }}
+                    transition={{ duration: 0.45 }}
+                    style={{
+                      width: "calc(50vw - 0px)",
+                      minHeight: "calc(100vh - 120px)",
+                      flexShrink: 0,
+                      position: "relative",
+                    }}
+                  >
+                    <ImageCycler slides={slides} />
+                  </motion.div>
+                </AnimatePresence>
 
-                {/* Side-by-side: image cycler | donation widget */}
-                <div className="grid md:grid-cols-2 gap-8 items-stretch">
-                  {/* Left — cycling images */}
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={mode}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.4 }}
-                      className="rounded-2xl overflow-hidden"
-                      style={{ minHeight: 400 }}
-                    >
-                      <ImageCycler slides={slides} />
-                    </motion.div>
-                  </AnimatePresence>
-
-                  {/* Right — donation widget */}
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={mode + "-widget"}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.4 }}
-                    >
-                      <DonationWidget mode={mode} />
-                    </motion.div>
-                  </AnimatePresence>
+                {/* ── Right: donation widget, scrollable ── */}
+                <div
+                  className="flex-1 flex items-start justify-center px-6 py-6 overflow-y-auto"
+                  style={{ maxWidth: "50vw" }}
+                >
+                  <div className="w-full max-w-md">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={mode + "-widget"}
+                        initial={{ opacity: 0, x: 30 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -30 }}
+                        transition={{ duration: 0.45 }}
+                      >
+                        <DonationWidget mode={mode} />
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
                 </div>
               </div>
             </section>
@@ -867,8 +1059,6 @@ export default function DonationsPage() {
             {/* ══ SECTION 5 — EVENTS (image 5) ════════════════════ */}
             <EventsSection />
 
-            {/* Bottom NavBar */}
-            <BottomNavBar />
           </motion.div>
         )}
       </AnimatePresence>

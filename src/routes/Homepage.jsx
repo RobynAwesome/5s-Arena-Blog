@@ -22,10 +22,10 @@ const LIVE_PREVIEW = [
 
 /* ── Social links ── */
 const SOCIAL = [
-  { href:'https://www.facebook.com/people/Fives-Arena/61588019843126/', label:'Facebook',  color:'#1877f2', followers:'2.4K', icon:'📘' },
-  { href:'https://www.instagram.com/fivesarena',                         label:'Instagram', color:'#e1306c', followers:'3.1K', icon:'📸' },
-  { href:'https://www.tiktok.com/@fivesarena',                           label:'TikTok',   color:'#69c9d0', followers:'5.8K', icon:'🎵' },
-  { href:'https://wa.me/27637820245',                                    label:'WhatsApp', color:'#25d366', followers:'Message Us', icon:'💬' },
+  { href:'https://www.facebook.com/profile.php?id=61588019843126', label:'Facebook',  color:'#1877f2', followers:'2.4K', icon:'📘' },
+  { href:'https://www.instagram.com/fivesarena',                   label:'Instagram', color:'#e1306c', followers:'3.1K', icon:'📸' },
+  { href:'https://www.tiktok.com/@fivesarena',                     label:'TikTok',   color:'#69c9d0', followers:'5.8K', icon:'🎵' },
+  { href:'https://wa.me/27637820245',                              label:'WhatsApp', color:'#25d366', followers:'Message Us', icon:'💬' },
 ];
 
 /* ── Animation variants ── */
@@ -47,6 +47,135 @@ function useCounter(target, isInView) {
     return () => clearInterval(timer);
   }, [isInView, target]);
   return count;
+}
+
+/* ── Video Post Card — full-bleed 16/9 banner with hover-to-play ── */
+function VideoPostCard({ post, index = 0 }) {
+  const videoRef = useRef(null);
+  const [hovered, setHovered] = useState(false);
+
+  const onEnter = () => {
+    setHovered(true);
+    videoRef.current?.play().catch(() => {});
+  };
+  const onLeave = () => {
+    setHovered(false);
+    if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0; }
+  };
+
+  return (
+    <Link to={`/${post.slug}`}>
+      <motion.div
+        className="relative w-full rounded-xl overflow-hidden cursor-pointer"
+        style={{ aspectRatio: '16/9', background: '#000' }}
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ type: 'spring', stiffness: 280, damping: 22, delay: index * 0.07 }}
+        whileHover={{ scale: 1.02 }}
+      >
+        {/* Poster image — shown when not hovered */}
+        <img
+          src={post.image}
+          alt={post.title}
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+          style={{ opacity: hovered ? 0 : 1 }}
+        />
+        {/* Video — plays on hover */}
+        <video
+          ref={videoRef}
+          src={post.video}
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+          style={{ opacity: hovered ? 1 : 0 }}
+        />
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 55%, transparent 100%)' }} />
+
+        {/* Top-left badge — Video / Playing */}
+        <div className="absolute top-2 left-2 z-10">
+          {hovered ? (
+            <motion.span
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-1 bg-green-500 text-black text-xs font-bold px-2 py-0.5 rounded-full"
+              style={{ fontFamily: "'Montserrat',sans-serif" }}
+            >
+              <motion.span
+                className="inline-block w-1.5 h-1.5 rounded-full bg-black"
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 0.9, repeat: Infinity }}
+              />
+              Playing
+            </motion.span>
+          ) : (
+            <span className="flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full" style={{ fontFamily: "'Montserrat',sans-serif" }}>
+              <span className="inline-block w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-l-[6px] border-l-white" />
+              Video
+            </span>
+          )}
+        </div>
+
+        {/* Reading time badge */}
+        <span className="absolute top-2 right-2 z-10 text-white text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', fontFamily: "'Inter',sans-serif" }}>
+          {post.readingTime} min
+        </span>
+
+        {/* Center play icon — fades out on hover */}
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center pointer-events-none"
+          style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
+          animate={{ opacity: hovered ? 0 : 1, scale: hovered ? 0.7 : 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <span className="inline-block w-0 h-0 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent border-l-[15px] border-l-white ml-1" />
+        </motion.div>
+
+        {/* Bottom content */}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <span
+            className="label-tag text-xs px-2 py-0.5 rounded-full text-white inline-block mb-2"
+            style={{ background: 'linear-gradient(135deg,#b45309,#f59e0b)' }}
+          >
+            {post.category}
+          </span>
+          <h3
+            className="text-white line-clamp-2 leading-tight"
+            style={{
+              fontFamily: "'Oswald',sans-serif",
+              fontSize: '1rem',
+              textTransform: 'uppercase',
+              color: hovered ? '#22c55e' : '#f9fafb',
+              transition: 'color 0.25s',
+            }}
+          >
+            {post.title}
+          </h3>
+          {post.author && (
+            <div className="flex items-center gap-2 mt-2">
+              <img src={post.author.image} alt={post.author.name} className="w-5 h-5 rounded-full object-cover border border-white/20"
+                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=16a34a&color=fff`; }} />
+              <span className="text-gray-300 text-xs" style={{ fontFamily: "'Inter',sans-serif" }}>{post.author.name}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Green left border on hover */}
+        <motion.div
+          className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl"
+          style={{ background: 'linear-gradient(to bottom, #22c55e, #06b6d4)' }}
+          initial={{ scaleY: 0 }}
+          animate={{ scaleY: hovered ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
+        />
+      </motion.div>
+    </Link>
+  );
 }
 
 /* ── Stats Bar component ── */
@@ -85,20 +214,46 @@ function StatsBar() {
 function VideoCyclingStrip() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [hoveredGrid, setHoveredGrid] = useState(null); // index hovered in grid, or null
   const videoRef = useRef(null);
+  const gridVideoRefs = useRef([]); // refs for each grid card video
 
+  /* Main player auto-cycle */
   useEffect(() => {
     if (paused) return;
     const t = setInterval(() => setActiveIdx(i => (i + 1) % videoPosts.length), 10000);
     return () => clearInterval(t);
   }, [paused]);
 
+  /* Reset main player on active change */
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
   }, [activeIdx]);
+
+  /* Auto-cycle grid highlight when no card is hovered */
+  useEffect(() => {
+    if (hoveredGrid !== null) return;
+    const t = setInterval(() => setActiveIdx(i => (i + 1) % videoPosts.length), 10000);
+    return () => clearInterval(t);
+  }, [hoveredGrid]);
+
+  /* Handle grid card hover — play that card's video inline */
+  const onGridEnter = (i) => {
+    setHoveredGrid(i);
+    setPaused(true);
+    const vid = gridVideoRefs.current[i];
+    if (vid) vid.play().catch(() => {});
+  };
+
+  const onGridLeave = (i) => {
+    setHoveredGrid(null);
+    setPaused(false);
+    const vid = gridVideoRefs.current[i];
+    if (vid) { vid.pause(); vid.currentTime = 0; }
+  };
 
   if (!videoPosts.length) return null;
   const active = videoPosts[activeIdx];
@@ -109,7 +264,7 @@ function VideoCyclingStrip() {
         <h2 className="section-heading text-white text-2xl">🎬 Video Posts</h2>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 gap-6 items-center">
+      <div className="grid md:grid-cols-2 gap-6 items-start">
         {/* Main video player */}
         <motion.div
           key={activeIdx}
@@ -137,33 +292,113 @@ function VideoCyclingStrip() {
           </div>
         </motion.div>
 
-        {/* Playlist */}
-        <div className="flex flex-col gap-3">
-          {videoPosts.map((vp, i) => (
-            <motion.div
-              key={vp.id}
-              onClick={() => { setActiveIdx(i); setPaused(false); }}
-              className="flex gap-3 rounded-xl p-3 cursor-pointer transition-all"
-              style={{
-                background: i===activeIdx ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${i===activeIdx ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.06)'}`,
-              }}
-              whileHover={{ x: 4 }}
-            >
-              <div className="w-20 h-14 rounded-lg overflow-hidden flex-shrink-0 relative">
-                <img src={vp.image} alt={vp.title} className="w-full h-full object-cover" />
-                {i===activeIdx && <div className="absolute inset-0 flex items-center justify-center" style={{background:'rgba(0,0,0,0.4)'}}>
-                  <span className="w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[9px] border-l-white ml-0.5" />
-                </div>}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold line-clamp-2" style={{fontFamily:"'Oswald',sans-serif",textTransform:'uppercase',color: i===activeIdx ? '#22c55e' : '#f9fafb',fontSize:'0.8rem'}}>
-                  {vp.title}
-                </p>
-                <p className="text-xs mt-1" style={{color:'#6b7280',fontFamily:"'Inter',sans-serif"}}>{vp.readingTime} min · {vp.category}</p>
-              </div>
-            </motion.div>
-          ))}
+        {/* Right side — 2-column grid of video cards */}
+        <div className="grid grid-cols-2 gap-3">
+          {videoPosts.map((vp, i) => {
+            const isActive   = i === activeIdx;
+            const isHovered  = i === hoveredGrid;
+            return (
+              <motion.div
+                key={vp.id}
+                className="relative rounded-xl overflow-hidden cursor-pointer"
+                style={{
+                  aspectRatio: '16/9',
+                  background: '#000',
+                  border: `2px solid ${isActive ? 'rgba(34,197,94,0.7)' : 'rgba(255,255,255,0.06)'}`,
+                  boxShadow: isActive ? '0 0 16px rgba(34,197,94,0.35)' : 'none',
+                  transition: 'border-color 0.3s, box-shadow 0.3s',
+                }}
+                onClick={() => { setActiveIdx(i); setPaused(false); }}
+                onMouseEnter={() => onGridEnter(i)}
+                onMouseLeave={() => onGridLeave(i)}
+                whileHover={{ scale: 1.03 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+              >
+                {/* Thumbnail / video */}
+                <img
+                  src={vp.image}
+                  alt={vp.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
+                  style={{ opacity: isHovered ? 0 : 1 }}
+                />
+                <video
+                  ref={el => { gridVideoRefs.current[i] = el; }}
+                  src={vp.video}
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
+                  style={{ opacity: isHovered ? 1 : 0 }}
+                />
+
+                {/* Gradient overlay */}
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 60%)' }} />
+
+                {/* Top badge */}
+                <div className="absolute top-1.5 left-1.5 z-10">
+                  <span
+                    className="text-white text-xs px-1.5 py-0.5 rounded-full font-bold"
+                    style={{ background: getCategoryGradientLocal(vp.category), fontFamily: "'Montserrat',sans-serif", fontSize: '0.6rem' }}
+                  >
+                    {vp.category}
+                  </span>
+                </div>
+
+                {/* Playing / Video indicator */}
+                <div className="absolute top-1.5 right-1.5 z-10">
+                  {isHovered ? (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex items-center gap-0.5 bg-green-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full"
+                      style={{ fontFamily: "'Montserrat',sans-serif", fontSize: '0.6rem' }}
+                    >
+                      <motion.span
+                        className="inline-block w-1 h-1 rounded-full bg-black"
+                        animate={{ opacity: [1, 0.3, 1] }}
+                        transition={{ duration: 0.9, repeat: Infinity }}
+                      />
+                      Playing
+                    </motion.span>
+                  ) : (
+                    <span className="flex items-center gap-0.5 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full" style={{ fontFamily: "'Montserrat',sans-serif", fontSize: '0.6rem' }}>
+                      <span className="inline-block w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[5px] border-l-white" />
+                      Video
+                    </span>
+                  )}
+                </div>
+
+                {/* Bottom text */}
+                <div className="absolute bottom-0 left-0 right-0 p-2">
+                  <p
+                    className="line-clamp-2 leading-tight"
+                    style={{
+                      fontFamily: "'Oswald',sans-serif",
+                      fontSize: '0.72rem',
+                      textTransform: 'uppercase',
+                      color: isActive ? '#22c55e' : '#f9fafb',
+                      transition: 'color 0.25s',
+                    }}
+                  >
+                    {vp.title}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: '#9ca3af', fontFamily: "'Inter',sans-serif", fontSize: '0.6rem' }}>
+                    {vp.readingTime} min
+                  </p>
+                </div>
+
+                {/* Active green glow border overlay */}
+                {isActive && (
+                  <motion.div
+                    className="absolute inset-0 rounded-xl pointer-events-none"
+                    style={{ border: '2px solid rgba(34,197,94,0.6)' }}
+                    animate={{ opacity: [0.6, 1, 0.6] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                )}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 
@@ -176,6 +411,21 @@ function VideoCyclingStrip() {
       </div>
     </section>
   );
+}
+
+/* local category gradient helper (mirrors PostCard mapping) */
+function getCategoryGradientLocal(cat) {
+  const MAP = {
+    Culture:       'linear-gradient(135deg,#059669,#22c55e)',
+    Legends:       'linear-gradient(135deg,#b45309,#f59e0b)',
+    Skills:        'linear-gradient(135deg,#1d4ed8,#06b6d4)',
+    Tactics:       'linear-gradient(135deg,#7c3aed,#a78bfa)',
+    Fitness:       'linear-gradient(135deg,#0e7490,#22d3ee)',
+    Community:     'linear-gradient(135deg,#15803d,#4ade80)',
+    News:          'linear-gradient(135deg,#be123c,#f43f5e)',
+    "Women's Game":'linear-gradient(135deg,#9d174d,#ec4899)',
+  };
+  return MAP[cat] ?? 'linear-gradient(135deg,#374151,#6b7280)';
 }
 
 /* ── Fixtures Preview Widget ── */
@@ -277,9 +527,13 @@ function FeaturedCarousel() {
             exit="exit"
             className="grid grid-cols-1 sm:grid-cols-3 gap-5"
           >
-            {visible.map((post, i) => (
-              <PostCard key={`${post.id}-${i}`} post={post} index={i} />
-            ))}
+            {visible.map((post, i) =>
+              post.video ? (
+                <VideoPostCard key={`${post.id}-${i}`} post={post} index={i} />
+              ) : (
+                <PostCard key={`${post.id}-${i}`} post={post} index={i} />
+              )
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -524,7 +778,11 @@ export default function Homepage() {
         <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{once:true}} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {recentPosts.map((post, index) => (
             <motion.div key={post.id} variants={fadeUp}>
-              <PostCard post={post} index={index} />
+              {post.video ? (
+                <VideoPostCard post={post} index={index} />
+              ) : (
+                <PostCard post={post} index={index} />
+              )}
             </motion.div>
           ))}
         </motion.div>
