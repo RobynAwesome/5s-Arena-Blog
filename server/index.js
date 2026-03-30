@@ -12,7 +12,6 @@ dotenv.config({ path: join(__dirname, ".env") });
 
 import postRoutes from "./routes/posts.js";
 import authRoutes from "./routes/auth.js";
-import authMiddleware from "./middleware/authMiddleware.js"; // Import authMiddleware
 import commentRoutes from "./routes/comments.js";
 
 const app = express();

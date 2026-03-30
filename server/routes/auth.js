@@ -2,7 +2,6 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { OAuth2Client } from "google-auth-library";
-import authMiddleware from "../middleware/authMiddleware.js"; // Import the new middleware
 
 const router = Router();
 
@@ -78,21 +77,33 @@ router.post("/login", async (req, res) => {
 });
 
 // GET /me - get current user from JWT (protected route)
-router.get("/me", authMiddleware, async (req, res) => {
+router.get("/me", async (req, res) => {
   try {
-    // req.user is now available from authMiddleware
-    const user = await User.findById(req.user.id).select("-password -__v"); // Exclude password and __v field
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json({ error: "Authentication failed: No token provided" }); // Missing check for no token/malformed header
+    }
+
+    // Extract token
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.id).select("-password -__v"); // Exclude password and __v field
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
     // Return a simplified user object, without the full Mongoose model
     res.json(user);
   } catch (err) {
     console.error("Profile fetch error:", err); // More detailed logging
-    res
-      .status(401)
-      .json({ error: "Authentication failed. Please log in again." }); // Generic message to client
+    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
+      return res
+        .status(401)
+        .json({ error: "Authentication failed: Invalid or expired token." });
+    }
+    res.status(500).json({ error: "Server error during profile fetch." }); // Generic message to client
   }
 });
 

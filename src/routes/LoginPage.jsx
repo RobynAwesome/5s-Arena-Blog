@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, GOOGLE_CLIENT_ID } from "@/context/AuthContext";
+import { jwtDecode } from "jwt-decode"; // Keep this import if you still need jwtDecode for client-side debugging, otherwise remove
 import { GoogleLogin } from "@react-oauth/google";
 
 /* ── Particle field background (Bookit-style) ── */
@@ -96,12 +97,11 @@ export default function LoginPage() {
   const handleLogin = (e) => {
     e.preventDefault();
     setError("");
-    login(email, password).then(result => {
-      if (result.success) navigate("/");
-      else setError(result.error);
-    } else {
-      setError(result.error);
-    }
+    login(email, password).then((result) => {
+      if (result.success) {
+        navigate("/");
+      } else setError(result.error); // Missing closing parenthesis
+    });
   };
 
   const handleRegister = (e) => {
@@ -111,12 +111,11 @@ export default function LoginPage() {
       setError("Password must be at least 6 characters.");
       return;
     }
-    register(name, email, password).then(result => {
-      if (result.success) navigate("/");
-      else setError(result.error);
-    } else {
-      setError(result.error);
-    }
+    register(name, email, password).then((result) => {
+      if (result.success) {
+        navigate("/");
+      } else setError(result.error); // Missing closing parenthesis
+    });
   };
 
   const formVariants = {
@@ -126,11 +125,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex relative overflow-hidden">
+    <div className="relative flex min-h-screen overflow-hidden bg-gray-950">
       <ParticleField />
 
       {/* Left branding panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative z-10 flex-col items-center justify-center p-12">
+      <div className="relative z-10 flex-col items-center justify-center hidden p-12 lg:flex lg:w-1/2">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -138,33 +137,33 @@ export default function LoginPage() {
           className="text-center"
         >
           <img src="/logo.png" alt="5s Arena" className="w-32 h-32 mx-auto mb-6 rounded-full shadow-2xl shadow-green-500/20" />
-          <h1 className="text-5xl font-bold text-white mb-4">
+          <h1 className="mb-4 text-5xl font-bold text-white">
             5s <span className="text-green-500">Arena</span>
           </h1>
-          <p className="text-gray-400 text-lg max-w-md mx-auto leading-relaxed">
+          <p className="max-w-md mx-auto text-lg leading-relaxed text-gray-400">
             Your home for football culture, stories, and community. Join thousands of fans sharing their passion for the beautiful game.
           </p>
           <div className="flex items-center justify-center gap-8 mt-10">
             <div className="text-center">
               <p className="text-3xl font-bold text-green-500">46+</p>
-              <p className="text-gray-500 text-sm">Articles</p>
+              <p className="text-sm text-gray-500">Articles</p>
             </div>
             <div className="w-px h-12 bg-gray-700" />
             <div className="text-center">
               <p className="text-3xl font-bold text-green-500">6</p>
-              <p className="text-gray-500 text-sm">Authors</p>
+              <p className="text-sm text-gray-500">Authors</p>
             </div>
             <div className="w-px h-12 bg-gray-700" />
             <div className="text-center">
               <p className="text-3xl font-bold text-green-500">10+</p>
-              <p className="text-gray-500 text-sm">Categories</p>
+              <p className="text-sm text-gray-500">Categories</p>
             </div>
           </div>
         </motion.div>
       </div>
 
       {/* Right auth panel */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center relative z-10 px-4 py-12">
+      <div className="relative z-10 flex items-center justify-center w-full px-4 py-12 lg:w-1/2">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -172,7 +171,7 @@ export default function LoginPage() {
           className="w-full max-w-md"
         >
           {/* Mobile logo */}
-          <div className="lg:hidden text-center mb-8">
+          <div className="mb-8 text-center lg:hidden">
             <img src="/logo.png" alt="5s Arena" className="w-20 h-20 mx-auto mb-3 rounded-full shadow-lg" />
             <h2 className="text-2xl font-bold text-white">
               5s <span className="text-green-500">Arena</span>
@@ -180,9 +179,9 @@ export default function LoginPage() {
           </div>
 
           {/* Card */}
-          <div className="bg-gray-900/80 backdrop-blur-xl border border-gray-800 rounded-2xl p-8 shadow-2xl">
+          <div className="p-8 border border-gray-800 shadow-2xl bg-gray-900/80 backdrop-blur-xl rounded-2xl">
             {/* Tabs */}
-            <div className="flex mb-8 bg-gray-800 rounded-xl p-1">
+            <div className="flex p-1 mb-8 bg-gray-800 rounded-xl">
               <button
                 onClick={() => { setMode("login"); setError(""); }}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
@@ -206,7 +205,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-900/30 border border-red-700 text-red-400 rounded-lg text-sm">
+              <div className="p-3 mb-4 text-sm text-red-400 border border-red-700 rounded-lg bg-red-900/30">
                 {error}
               </div>
             )}
@@ -228,7 +227,7 @@ export default function LoginPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                      className="w-full px-4 py-3 text-white placeholder-gray-500 transition-all bg-gray-800 border border-gray-700 outline-none rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="you@example.com"
                       required
                     />
@@ -239,18 +238,18 @@ export default function LoginPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                      className="w-full px-4 py-3 text-white placeholder-gray-500 transition-all bg-gray-800 border border-gray-700 outline-none rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="Your password"
                       required
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-green-600/25 hover:shadow-green-500/40"
+                    className="w-full py-3 font-semibold text-white transition-all duration-300 bg-green-600 shadow-lg hover:bg-green-500 rounded-xl shadow-green-600/25 hover:shadow-green-500/40"
                   >
                     Sign In
                   </button>
-                  <p className="text-center text-xs text-gray-500 mt-2">
+                  <p className="mt-2 text-xs text-center text-gray-500">
                     Demo: admin@5sarena.com / admin123
                   </p>
                 </motion.form>
@@ -270,7 +269,7 @@ export default function LoginPage() {
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                      className="w-full px-4 py-3 text-white placeholder-gray-500 transition-all bg-gray-800 border border-gray-700 outline-none rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="Your full name"
                       required
                     />
@@ -281,7 +280,7 @@ export default function LoginPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                      className="w-full px-4 py-3 text-white placeholder-gray-500 transition-all bg-gray-800 border border-gray-700 outline-none rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="you@example.com"
                       required
                     />
@@ -292,14 +291,14 @@ export default function LoginPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                      className="w-full px-4 py-3 text-white placeholder-gray-500 transition-all bg-gray-800 border border-gray-700 outline-none rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
                       placeholder="Min. 6 characters"
                       required
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-green-600/25 hover:shadow-green-500/40"
+                    className="w-full py-3 font-semibold text-white transition-all duration-300 bg-green-600 shadow-lg hover:bg-green-500 rounded-xl shadow-green-600/25 hover:shadow-green-500/40"
                   >
                     Create Account
                   </button>
@@ -310,7 +309,7 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-px bg-gray-700" />
-              <span className="text-xs text-gray-500 uppercase tracking-wider">or</span>
+              <span className="text-xs tracking-wider text-gray-500 uppercase">or</span>
               <div className="flex-1 h-px bg-gray-700" />
             </div>
 
@@ -338,7 +337,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setError("Google OAuth not configured. Add VITE_GOOGLE_CLIENT_ID to your .env file.")}
-                className="w-full flex items-center justify-center gap-3 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 font-medium rounded-xl transition-all"
+                className="flex items-center justify-center w-full gap-3 py-3 font-medium text-gray-300 transition-all bg-gray-800 border border-gray-700 hover:bg-gray-700 rounded-xl"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -351,7 +350,7 @@ export default function LoginPage() {
             )}
           </div>
 
-          <p className="text-center text-gray-600 text-xs mt-6">
+          <p className="mt-6 text-xs text-center text-gray-600">
             &copy; {new Date().getFullYear()} 5s Arena Blog. All rights reserved.
           </p>
         </motion.div>
