@@ -26,7 +26,7 @@ export default function AuthorProfilePage() {
         ]);
         
         // authors is now an array
-        const found = authors.find(a => a.name === decodedName);
+        const found = authors.find(a => a.username === decodedName);
         setAuthor(found);
         setAuthorPosts(posts || []);
       } catch (err) {
@@ -98,17 +98,17 @@ export default function AuthorProfilePage() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 200 }}>
             <motion.img
-              src={author.image}
-              alt={author.name}
+              src={author.avatar}
+              alt={author.username}
               className="w-28 h-28 rounded-full object-cover flex-shrink-0"
               style={{ border: "3px solid rgba(34,197,94,0.4)", boxShadow: "0 0 30px rgba(34,197,94,0.25)" }}
-              onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(author.name)}&background=16a34a&color=fff&size=112`; }}
+              onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(author.username)}&background=16a34a&color=fff&size=112`; }}
               whileHover={{ scale: 1.05 }}
             />
             <div className="text-center md:text-left">
               <h1 className="gradient-text mb-2"
                 style={{ fontFamily: "'Bebas Neue',Impact,sans-serif", fontSize: "clamp(2rem,6vw,3.5rem)", letterSpacing: "0.05em", lineHeight: 1 }}>
-                {author.name}
+                {author.username}
               </h1>
               <p style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.95rem", lineHeight: 1.6, maxWidth: "32rem" }}>
                 {author.bio}
@@ -155,14 +155,14 @@ export default function AuthorProfilePage() {
           initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }} transition={{ type: "spring", stiffness: 200 }}>
           <h2 style={{ fontFamily: "'Oswald',sans-serif", fontSize: "1.3rem", color: "#f9fafb" }}>
-            Articles by {author.name}
+            Articles by {author.username}
           </h2>
         </motion.div>
 
         {authorPosts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {authorPosts.map((post, i) => (
-              <motion.div key={post.id}
+              <motion.div key={post._id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

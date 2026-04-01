@@ -58,22 +58,22 @@ export default function AuthorsPage() {
       <div className="max-w-5xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {authorList.map((author, i) => (
-            <motion.div key={author.name}
+            <motion.div key={author.username}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ type: "spring", stiffness: 200, damping: 22, delay: i * 0.08 }}>
-              <Link to={`/authors/${encodeURIComponent(author.name)}`}>
+              <Link to={`/authors/${encodeURIComponent(author.username)}`}>
                 <motion.div
                   className="glass-card rounded-2xl p-6 text-center cursor-pointer h-full"
                   whileHover={{ y: -6, boxShadow: "0 16px 40px rgba(34,197,94,0.15)" }}>
-                  <img src={author.image} alt={author.name}
+                  <img src={author.avatar} alt={author.username}
                     className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                     style={{ border: "3px solid rgba(34,197,94,0.3)", boxShadow: "0 0 20px rgba(34,197,94,0.2)" }}
-                    onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(author.name)}&background=16a34a&color=fff&size=96`; }}
+                    onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(author.username)}&background=16a34a&color=fff&size=96`; }}
                   />
                   <h3 style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", fontSize: "1.1rem", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>
-                    {author.name}
+                    {author.username}
                   </h3>
                   <p style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.8rem", lineHeight: 1.5, marginBottom: "1rem" }}>
                     {author.bio}

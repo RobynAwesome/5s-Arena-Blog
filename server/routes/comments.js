@@ -7,9 +7,9 @@ const router = Router();
 // GET /:postId - get all comments for a post
 router.get('/:postId', async (req, res) => {
   try {
-    const comments = await Comment.find({ postId: req.params.postId }).sort({
-      createdAt: -1,
-    });
+    const comments = await Comment.find({ postId: req.params.postId })
+      .populate('author', 'username avatar')
+      .sort({ createdAt: -1 });
     res.json(comments);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -21,10 +21,11 @@ router.post('/:postId', protect, async (req, res) => {
   try {
     const comment = await Comment.create({
       postId: req.params.postId,
-      author: req.body.author,
-      email: req.body.email,
+      author: req.user._id,
       content: req.body.content,
     });
+    // Populate the author before sending back
+    await comment.populate('author', 'username avatar');
     res.status(201).json(comment);
   } catch (err) {
     res.status(400).json({ error: err.message });

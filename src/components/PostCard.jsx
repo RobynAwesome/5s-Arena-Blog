@@ -92,8 +92,8 @@ export function FeaturedPostCard({ post }) {
 
           {post.author && (
             <div className="flex items-center gap-2 mt-3">
-              <img src={post.author.image} alt={post.author.name} className="w-7 h-7 rounded-full object-cover border border-white/30" />
-              <span className="text-gray-300 text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>{post.author.name}</span>
+              <img src={post.author.avatar} alt={post.author.username} className="w-7 h-7 rounded-full object-cover border border-white/30" />
+              <span className="text-gray-300 text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>{post.author.username}</span>
               <span className="text-gray-500 text-xs ml-auto">{post.readingTime} min read</span>
             </div>
           )}
@@ -184,8 +184,8 @@ export default function PostCard({ post, index = 0, layout = "grid" }) {
             </h3>
             {post.author && (
               <div className="flex items-center gap-2 mt-auto">
-                <img src={post.author.image} alt={post.author.name} className="w-6 h-6 rounded-full object-cover" />
-                <span className="text-gray-400 text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>{post.author.name}</span>
+                <img src={post.author.avatar} alt={post.author.username} className="w-6 h-6 rounded-full object-cover" />
+                <span className="text-gray-400 text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>{post.author.username}</span>
                 <span className="text-gray-500 text-xs ml-auto">{post.readingTime} min</span>
               </div>
             )}
@@ -277,13 +277,13 @@ export default function PostCard({ post, index = 0, layout = "grid" }) {
           {post.author && (
             <div className="flex items-center gap-2 mt-auto pt-3 border-t border-white/5">
               <img
-                src={post.author.image}
-                alt={post.author.name}
+                src={post.author.avatar}
+                alt={post.author.username}
                 className="w-6 h-6 rounded-full object-cover border border-white/10"
-                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=16a34a&color=fff`; }}
+                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.username)}&background=16a34a&color=fff`; }}
               />
               <span className="text-gray-400 text-xs truncate" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {post.author.name}
+                {post.author.username}
               </span>
             </div>
           )}

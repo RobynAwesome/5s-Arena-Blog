@@ -141,7 +141,7 @@ export default function SearchModal() {
                       {results.length} Result{results.length !== 1 ? "s" : ""}
                     </p>
                     {results.map((post, i) => (
-                      <motion.button key={post.id}
+                      <motion.button key={post._id}
                         className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors"
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -171,7 +171,7 @@ export default function SearchModal() {
                               {post.category}
                             </span>
                             <span style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.65rem" }}>
-                              {post.author?.name}
+                              {post.author?.username}
                             </span>
                           </div>
                         </div>

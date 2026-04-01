@@ -5,7 +5,6 @@ import { getFeaturedPosts, getRecentPosts, getAllPosts } from "@/services/postSe
 import Newsletter from "@/components/Newsletter";
 import NewsletterPopup from "@/components/NewsletterPopup";
 import PostCard, { FeaturedPostCard } from "@/components/PostCard";
-import posts from "@/data/posts";
 
 /* ── Fixtures preview data (3 live matches) ── */
 const LIVE_PREVIEW = [

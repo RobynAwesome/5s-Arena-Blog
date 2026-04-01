@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Post from '../models/Post.js';
+import User from '../models/User.js';
 import { protect, authorize } from '../middleware/auth.js';
 
 const router = Router();
@@ -25,15 +26,20 @@ router.get('/', async (req, res) => {
     const { category, search, sort, page = 1, limit = 9 } = req.query;
     const query = {};
 
-    if (category) {
+    if (category && category !== 'All') {
       query.category = category;
     }
 
     if (search) {
+      // Find users matching search for author name
+      const matchedAuthors = await User.find({ username: { $regex: search, $options: 'i' } }).select('_id');
+      const authorIds = matchedAuthors.map(a => a._id);
+
       query.$or = [
         { title: { $regex: search, $options: 'i' } },
         { excerpt: { $regex: search, $options: 'i' } },
         { tags: { $regex: search, $options: 'i' } },
+        { author: { $in: authorIds } },
       ];
     }
 
@@ -45,6 +51,7 @@ router.get('/', async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const total = await Post.countDocuments(query);
     const posts = await Post.find(query)
+      .populate('author', 'username avatar bio')
       .sort(sortOption)
       .skip(skip)
       .limit(parseInt(limit));
@@ -63,7 +70,9 @@ router.get('/', async (req, res) => {
 // GET /featured - get featured posts
 router.get('/featured', async (req, res) => {
   try {
-    const posts = await Post.find({ featured: true }).sort({ createdAt: -1 });
+    const posts = await Post.find({ featured: true })
+      .populate('author', 'username avatar bio')
+      .sort({ createdAt: -1 });
     res.json(posts);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -77,7 +86,7 @@ router.get('/:slug', async (req, res) => {
       { slug: req.params.slug },
       { $inc: { views: 1 } },
       { new: true }
-    );
+    ).populate('author', 'username avatar bio');
     if (!post) return res.status(404).json({ error: 'Post not found' });
     res.json(post);
   } catch (err) {
@@ -89,6 +98,7 @@ router.get('/:slug', async (req, res) => {
 router.post('/', protect, authorize('author', 'admin'), async (req, res) => {
   try {
     const data = req.body;
+    data.author = req.user._id;
     data.slug = generateSlug(data.title);
     if (data.content) {
       data.readingTime = calculateReadingTime(data.content);

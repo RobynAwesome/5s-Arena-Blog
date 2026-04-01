@@ -5,6 +5,7 @@ import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/Toast";
+import { createPost } from "@/services/postService";
 
 const quillModules = {
   toolbar: [
@@ -26,6 +27,7 @@ export default function Write() {
   const [coverImage, setCoverImage] = useState("");
   const [tags, setTags] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const { user, isAuthor } = useAuth();
@@ -77,7 +79,7 @@ export default function Write() {
     );
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -87,37 +89,28 @@ export default function Write() {
       return;
     }
 
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    const newPost = {
-      id: Date.now(),
-      slug,
-      title,
-      category,
-      content,
-      image: coverImage || "/youtube-images/postImg.jpeg",
-      tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-      author: { name: user.name, image: user.image || "/authors/Jackson Wayne.png" },
-      readingTime: `${Math.max(1, Math.ceil(content.replace(/<[^>]*>/g, "").split(/\s+/).length / 200))} min read`,
-      createdAt: new Date().toISOString(),
-      views: 0,
-      featured: false,
-    };
+    setLoading(true);
 
-    const stored = localStorage.getItem("5s_user_posts");
-    const userPosts = stored ? JSON.parse(stored) : [];
-    userPosts.unshift(newPost);
-    localStorage.setItem("5s_user_posts", JSON.stringify(userPosts));
+    try {
+      const postData = {
+        title,
+        category,
+        content,
+        image: coverImage || "/youtube-images/postImg.jpeg",
+        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+      };
 
-    const managed = localStorage.getItem("5s_managed_posts");
-    if (managed) {
-      const managedPosts = JSON.parse(managed);
-      managedPosts.unshift({ id: newPost.id, slug, title, category, author: user.name, createdAt: newPost.createdAt, status: "published" });
-      localStorage.setItem("5s_managed_posts", JSON.stringify(managedPosts));
+      const result = await createPost(postData);
+
+      setSuccess(true);
+      showToast("Post published successfully! 🎉", "success");
+      setTimeout(() => navigate(`/${result.slug}`), 1500);
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to publish post. Please try again.");
+      showToast(err.response?.data?.error || "Failed to publish post.", "error");
+    } finally {
+      setLoading(false);
     }
-
-    setSuccess(true);
-    showToast("Post published successfully! 🎉", "success");
-    setTimeout(() => navigate(`/${slug}`), 1500);
   };
 
   if (success) {
@@ -286,12 +279,13 @@ export default function Write() {
           {/* Submit */}
           <motion.button
             type="submit"
-            className="btn-primary px-10 py-3.5 rounded-xl font-bold text-white text-sm"
+            disabled={loading}
+            className={`btn-primary px-10 py-3.5 rounded-xl font-bold text-white text-sm ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
             style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: "0.05em" }}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={!loading ? { y: -2 } : {}}
+            whileTap={!loading ? { scale: 0.97 } : {}}
           >
-            Publish Post
+            {loading ? "Publishing..." : "Publish Post"}
           </motion.button>
         </form>
       </div>

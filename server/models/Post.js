@@ -17,7 +17,7 @@ const postSchema = new mongoose.Schema(
     excerpt: {
       type: String,
     },
-    coverImage: {
+    image: {
       type: String,
     },
     category: {
@@ -37,8 +37,9 @@ const postSchema = new mongoose.Schema(
       ],
     },
     author: {
-      name: String,
-      image: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
     tags: [String],
     readingTime: {
@@ -51,6 +52,11 @@ const postSchema = new mongoose.Schema(
     featured: {
       type: Boolean,
       default: false,
+    },
+    series: {
+      name: String,
+      part: Number,
+      total: Number,
     },
   },
   {

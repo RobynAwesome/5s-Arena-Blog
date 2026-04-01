@@ -13,7 +13,7 @@ export default function SeriesNav({ currentPost, allPosts }) {
 
   if (seriesPosts.length < 2) return null;
 
-  const currentIndex = seriesPosts.findIndex((p) => p.id === currentPost.id);
+  const currentIndex = seriesPosts.findIndex((p) => p._id === currentPost._id);
   const prevPost = currentIndex > 0 ? seriesPosts[currentIndex - 1] : null;
   const nextPost = currentIndex < seriesPosts.length - 1 ? seriesPosts[currentIndex + 1] : null;
 
@@ -62,10 +62,10 @@ export default function SeriesNav({ currentPost, allPosts }) {
       {/* Series post list */}
       <div className="space-y-2 mb-4">
         {seriesPosts.map((post) => {
-          const isCurrent = post.id === currentPost.id;
+          const isCurrent = post._id === currentPost._id;
           return (
             <Link
-              key={post.id}
+              key={post._id}
               to={`/${post.slug}`}
               className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors"
               style={{

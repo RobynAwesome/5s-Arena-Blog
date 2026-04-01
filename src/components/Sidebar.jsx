@@ -84,7 +84,7 @@ export default function Sidebar() {
         </h4>
         <ul className="space-y-3">
           {popularPosts.map((post, i) => (
-            <motion.li key={post.id}
+            <motion.li key={post._id}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 + i * 0.05, type: "spring", stiffness: 200 }}
@@ -159,14 +159,14 @@ export default function Sidebar() {
             Author Spotlight
           </h4>
           <img
-            src={spotlightAuthor.image}
-            alt={spotlightAuthor.name}
+            src={spotlightAuthor.avatar}
+            alt={spotlightAuthor.username}
             className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
             style={{ border: "2px solid rgba(34,197,94,0.3)", boxShadow: "0 0 16px rgba(34,197,94,0.2)" }}
-            onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(spotlightAuthor.name)}&background=16a34a&color=fff`; }}
+            onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(spotlightAuthor.username)}&background=16a34a&color=fff`; }}
           />
           <h5 style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", fontSize: "0.95rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            {spotlightAuthor.name}
+            {spotlightAuthor.username}
           </h5>
           <p style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.8rem", lineHeight: 1.5, marginTop: "0.5rem" }}>
             {spotlightAuthor.bio}

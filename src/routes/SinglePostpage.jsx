@@ -1,10 +1,17 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { FaFacebookF, FaWhatsapp, FaLink } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiClock } from "react-icons/fi";
-import { getPostBySlug, getRelatedPosts, getAdjacentPosts } from "@/services/postService";
+import { 
+  getPostBySlug, 
+  getRelatedPosts, 
+  getAdjacentPosts,
+  getAllPosts 
+} from "@/services/postService";
+import { getComments, postComment } from "@/services/commentService";
+import { useAuth } from "@/context/AuthContext";
 import { useReadingHistory } from "@/hooks/useReadingHistory";
 import FloatingSocialBar from "@/components/FloatingSocialBar";
 import ArticleFooter from "@/components/ArticleFooter";
@@ -12,7 +19,6 @@ import RelatedArticles from "@/components/RelatedArticles";
 import InPostFixturesWidget from "@/components/InPostFixturesWidget";
 import SeriesNav from "@/components/SeriesNav";
 import TableOfContents from "@/components/TableOfContents";
-import { getAllPosts } from "@/services/postService";
 import { useToast } from "@/components/Toast";
 
 /* ── Category gradients (shared with PostCard) ────────────── */
@@ -91,6 +97,8 @@ function ReadingProgressBar() {
    ═══════════════════════════════════════════════════════════════ */
 export default function SinglePostPage() {
   const { slug } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [commentForm, setCommentForm] = useState({ name: "", email: "", content: "" });
   const [commentSuccess, setCommentSuccess] = useState(false);
   const [commentVersion, setCommentVersion] = useState(0);
@@ -104,6 +112,8 @@ export default function SinglePostPage() {
   const [post, setPost] = useState(null);
   const [related, setRelated] = useState([]);
   const [adjacent, setAdjacent] = useState({ prev: null, next: null });
+  const [comments, setComments] = useState([]);
+  const [seriesPosts, setSeriesPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -114,12 +124,24 @@ export default function SinglePostPage() {
         const p = await getPostBySlug(slug);
         setPost(p);
         if (p) {
-          const [rel, adj] = await Promise.all([
+          const [rel, adj, comms] = await Promise.all([
             getRelatedPosts(slug, 6),
-            getAdjacentPosts(slug)
+            getAdjacentPosts(slug),
+            getComments(p._id)
           ]);
           setRelated(rel);
           setAdjacent(adj);
+          setComments(comms);
+          
+          if (p.series) {
+            const seriesData = await getAllPosts({ 
+              page: 1, 
+              limit: 50, 
+              search: p.series.name 
+            });
+            setSeriesPosts(seriesData.posts);
+          }
+          
           addToHistory(p);
         }
       } catch (error) {
@@ -136,16 +158,9 @@ export default function SinglePostPage() {
     return related.filter(p => p.category === categoryFilter).slice(0, 4);
   }, [related, categoryFilter]);
 
-  const comments = useMemo(() => {
-    void commentVersion;
-    if (!post) return [];
-    const stored = localStorage.getItem(`comments_${slug}`);
-    return stored ? JSON.parse(stored) : [];
-  }, [slug, post, commentVersion]);
-
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (post) addToHistory(post.id);
+    if (post) addToHistory(post._id);
     setViewMode("rectangular");
     setCategoryFilter(null);
   }, [slug, post, addToHistory]);
@@ -206,22 +221,22 @@ export default function SinglePostPage() {
     };
   }, [post]);
 
-  const handleCommentSubmit = (e) => {
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    const newComment = {
-      id: Date.now(),
-      name: commentForm.name,
-      email: commentForm.email,
-      content: commentForm.content,
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [...comments, newComment];
-    localStorage.setItem(`comments_${slug}`, JSON.stringify(updated));
-    setCommentVersion((v) => v + 1);
-    setCommentForm({ name: "", email: "", content: "" });
-    setCommentSuccess(true);
-    showToast("Comment posted! Thanks for joining the conversation. 💬", "success");
-    setTimeout(() => setCommentSuccess(false), 3000);
+    if (!user) {
+      showToast("Please login to post a comment.", "error");
+      return;
+    }
+    try {
+      const newComment = await postComment(post._id, commentForm.content);
+      setComments([newComment, ...comments]);
+      setCommentForm({ name: "", email: "", content: "" });
+      setCommentSuccess(true);
+      showToast("Comment posted! Thanks for joining the conversation. 💬", "success");
+      setTimeout(() => setCommentSuccess(false), 3000);
+    } catch (error) {
+      showToast("Failed to post comment. Please try again.", "error");
+    }
   };
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -380,14 +395,14 @@ export default function SinglePostPage() {
                 style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="flex items-center gap-3">
                   <img
-                    src={post.author?.image || "/authors/Jackson Wayne.png"}
-                    alt={post.author?.name || "Author"}
+                    src={post.author?.avatar || "/authors/Jackson Wayne.png"}
+                    alt={post.author?.username || "Author"}
                     className="w-12 h-12 rounded-full object-cover"
                     style={{ border: "2px solid rgba(34,197,94,0.3)" }}
-                    onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.name || "Author")}&background=16a34a&color=fff`; }}
+                    onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.username || "Author")}&background=16a34a&color=fff`; }}
                   />
                   <div>
-                    <p style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", fontSize: "0.95rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>{post.author?.name}</p>
+                    <p style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", fontSize: "0.95rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>{post.author?.username}</p>
                     <p style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", fontSize: "0.8rem" }}>
                       {new Date(post.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                     </p>
@@ -476,10 +491,10 @@ export default function SinglePostPage() {
                     style={{ background: "#242526", border: "1px solid #3a3b3c" }}>
                     {/* FB header */}
                     <div className="flex items-center gap-3 p-3">
-                      <img src={post.author?.image} alt="" className="w-10 h-10 rounded-full object-cover"
-                        onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.name || "A")}&background=16a34a&color=fff`; }} />
+                      <img src={post.author?.avatar} alt="" className="w-10 h-10 rounded-full object-cover"
+                        onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.username || "A")}&background=16a34a&color=fff`; }} />
                       <div>
-                        <div style={{ color: "#e4e6eb", fontWeight: 600, fontSize: "0.9rem" }}>{post.author?.name}</div>
+                        <div style={{ color: "#e4e6eb", fontWeight: 600, fontSize: "0.9rem" }}>{post.author?.username}</div>
                         <div style={{ color: "#b0b3b8", fontSize: "0.75rem" }}>
                           {new Date(post.createdAt).toLocaleDateString()} · 🌐
                         </div>
@@ -519,9 +534,9 @@ export default function SinglePostPage() {
                   <div className="max-w-md mx-auto mb-10">
                     {/* IG header */}
                     <div className="flex items-center gap-3 mb-3">
-                      <img src={post.author?.image} alt="" className="w-8 h-8 rounded-full object-cover"
+                      <img src={post.author?.avatar} alt="" className="w-8 h-8 rounded-full object-cover"
                         style={{ border: "2px solid #e1306c" }}
-                        onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.name || "A")}&background=16a34a&color=fff`; }} />
+                        onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.username || "A")}&background=16a34a&color=fff`; }} />
                       <span style={{ color: "#f9fafb", fontWeight: 600, fontSize: "0.85rem" }}>fivesarena</span>
                     </div>
                     {post.image && (
@@ -547,9 +562,9 @@ export default function SinglePostPage() {
                   <div className="max-w-lg mx-auto mb-10 rounded-2xl p-5"
                     style={{ background: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"300\"><rect fill=\"%230b141a\" width=\"300\" height=\"300\"/></svg>') #0b141a" }}>
                     <div className="flex items-center gap-2 mb-4 pb-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                      <img src={post.author?.image} alt="" className="w-8 h-8 rounded-full object-cover"
-                        onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.name || "A")}&background=16a34a&color=fff`; }} />
-                      <span style={{ color: "#e9edef", fontWeight: 600, fontSize: "0.9rem" }}>{post.author?.name}</span>
+                      <img src={post.author?.avatar} alt="" className="w-8 h-8 rounded-full object-cover"
+                        onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.username || "A")}&background=16a34a&color=fff`; }} />
+                      <span style={{ color: "#e9edef", fontWeight: 600, fontSize: "0.9rem" }}>{post.author?.username}</span>
                       <span className="text-xs ml-auto" style={{ color: "#8696a0" }}>online</span>
                     </div>
                     {/* Bubbles */}
@@ -599,7 +614,7 @@ export default function SinglePostPage() {
             </AnimatePresence>
 
             {/* Series Navigation */}
-            <SeriesNav currentPost={post} allPosts={getAllPosts({ page: 1, limit: 100 }).posts} />
+            <SeriesNav currentPost={post} allPosts={seriesPosts} />
 
             {/* Article Footer (tags, prev/next, share) */}
             <ArticleFooter post={post} prevPost={adjacent.prev} nextPost={adjacent.next} />
@@ -613,17 +628,21 @@ export default function SinglePostPage() {
               {comments.length > 0 ? (
                 <div className="space-y-4 mb-8">
                   {comments.map((comment) => (
-                    <motion.div key={comment.id}
+                    <motion.div key={comment._id}
                       className="rounded-xl p-4"
                       style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}>
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                          style={{ background: "linear-gradient(135deg,#059669,#22c55e)" }}>
-                          {comment.name?.charAt(0)?.toUpperCase() || "A"}
-                        </div>
-                        <span style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", fontSize: "0.85rem", textTransform: "uppercase" }}>{comment.name}</span>
+                        {comment.author?.avatar ? (
+                          <img src={comment.author.avatar} alt={comment.author.username} className="w-8 h-8 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                            style={{ background: "linear-gradient(135deg,#059669,#22c55e)" }}>
+                            {comment.author?.username?.charAt(0)?.toUpperCase() || "A"}
+                          </div>
+                        )}
+                        <span style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", fontSize: "0.85rem", textTransform: "uppercase" }}>{comment.author?.username}</span>
                         <span style={{ color: "#6b7280", fontSize: "0.7rem" }}>
                           {new Date(comment.createdAt).toLocaleDateString()}
                         </span>
@@ -638,39 +657,44 @@ export default function SinglePostPage() {
                 </p>
               )}
 
-              <form onSubmit={handleCommentSubmit}
-                className="rounded-xl p-6 space-y-4"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <h4 style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", textTransform: "uppercase", letterSpacing: "0.05em" }}>Leave a Comment</h4>
-                {commentSuccess && (
-                  <p style={{ color: "#22c55e", fontSize: "0.85rem", fontFamily: "'Inter',sans-serif" }}>Comment posted successfully!</p>
-                )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <input type="text" placeholder="Your name" value={commentForm.name}
-                    onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
-                    className="px-4 py-2.5 rounded-lg outline-none text-sm"
+              {user ? (
+                <form onSubmit={handleCommentSubmit}
+                  className="rounded-xl p-6 space-y-4"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <h4 style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", textTransform: "uppercase", letterSpacing: "0.05em" }}>Leave a Comment</h4>
+                  {commentSuccess && (
+                    <p style={{ color: "#22c55e", fontSize: "0.85rem", fontFamily: "'Inter',sans-serif" }}>Comment posted successfully!</p>
+                  )}
+                  <textarea placeholder="Write your comment..." value={commentForm.content}
+                    onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })}
+                    rows={4}
+                    className="w-full px-4 py-2.5 rounded-lg outline-none text-sm resize-y"
                     style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
                     required />
-                  <input type="email" placeholder="Your email" value={commentForm.email}
-                    onChange={(e) => setCommentForm({ ...commentForm, email: e.target.value })}
-                    className="px-4 py-2.5 rounded-lg outline-none text-sm"
-                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
-                    required />
+                  <motion.button type="submit"
+                    className="btn-primary px-6 py-2.5 rounded-xl font-semibold text-sm"
+                    style={{ fontFamily: "'Montserrat',sans-serif" }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}>
+                    Post Comment
+                  </motion.button>
+                </form>
+              ) : (
+                <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                   <p style={{ color: "#9ca3af", fontFamily: "'Inter',sans-serif", marginBottom: "1.5rem" }}>
+                     You must be logged in to post a comment.
+                   </p>
+                   <Link to="/login">
+                     <motion.button
+                       className="btn-primary px-6 py-2 rounded-xl font-semibold text-sm"
+                       whileHover={{ scale: 1.05 }}
+                       whileTap={{ scale: 0.95 }}
+                     >
+                       Login to Comment
+                     </motion.button>
+                   </Link>
                 </div>
-                <textarea placeholder="Write your comment..." value={commentForm.content}
-                  onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })}
-                  rows={4}
-                  className="w-full px-4 py-2.5 rounded-lg outline-none text-sm resize-y"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#f9fafb", fontFamily: "'Inter',sans-serif" }}
-                  required />
-                <motion.button type="submit"
-                  className="btn-primary px-6 py-2.5 rounded-xl font-semibold text-sm"
-                  style={{ fontFamily: "'Montserrat',sans-serif" }}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}>
-                  Post Comment
-                </motion.button>
-              </form>
+              )}
             </section>
           </article>
 
@@ -705,14 +729,14 @@ export default function SinglePostPage() {
                 About the Author
               </h4>
               <img
-                src={post.author?.image}
-                alt={post.author?.name}
+                src={post.author?.avatar}
+                alt={post.author?.username}
                 className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
                 style={{ border: "3px solid rgba(34,197,94,0.3)", boxShadow: "0 0 20px rgba(34,197,94,0.2)" }}
-                onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.name || "Author")}&background=16a34a&color=fff`; }}
+                onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.username || "Author")}&background=16a34a&color=fff`; }}
               />
               <h5 style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                {post.author?.name}
+                {post.author?.username}
               </h5>
               <p style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.8rem", lineHeight: 1.5, marginTop: "0.5rem" }}>
                 {post.author?.bio}

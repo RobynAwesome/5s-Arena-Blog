@@ -100,3 +100,33 @@ export async function getPostsByAuthor(authorName) {
     return [];
   }
 }
+
+export async function createPost(postData) {
+  try {
+    const response = await api.post("/posts", postData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating post:", error);
+    throw error;
+  }
+}
+
+export async function updatePost(id, postData) {
+  try {
+    const response = await api.put(`/posts/${id}`, postData);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating post with id ${id}:`, error);
+    throw error;
+  }
+}
+
+export async function deletePost(id) {
+  try {
+    const response = await api.delete(`/posts/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting post with id ${id}:`, error);
+    throw error;
+  }
+}
