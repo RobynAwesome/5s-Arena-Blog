@@ -1,17 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { getFeaturedPosts, getRecentPosts } from "@/services/postService";
+import { getFeaturedPosts, getRecentPosts, getAllPosts } from "@/services/postService";
 import Newsletter from "@/components/Newsletter";
 import NewsletterPopup from "@/components/NewsletterPopup";
 import PostCard, { FeaturedPostCard } from "@/components/PostCard";
 import posts from "@/data/posts";
-
-/* ── Data ── */
-const allPosts        = posts;
-const featuredPosts   = getFeaturedPosts();
-const recentPosts     = getRecentPosts(9);
-const videoPosts      = allPosts.filter(p => p.video).slice(0, 7);
 
 /* ── Fixtures preview data (3 live matches) ── */
 const LIVE_PREVIEW = [
@@ -177,40 +171,44 @@ function VideoPostCard({ post, index = 0 }) {
   );
 }
 
+function StatItem({ value, label, suffix, icon, inView }) {
+  const count = useCounter(value, inView);
+  return (
+    <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center">
+      <div className="text-2xl mb-1">{icon}</div>
+      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '2.5rem', color: '#22c55e', textShadow: '0 0 20px rgba(34,197,94,0.4)' }}>
+        {count}{suffix}
+      </div>
+      <div style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280' }}>
+        {label}
+      </div>
+    </motion.div>
+  );
+}
+
 /* ── Stats Bar component ── */
 function StatsBar() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
   const stats = [
-    { value:46, label:'Articles', suffix:'', icon:'📰' },
-    { value:7,  label:'Video Posts', suffix:'', icon:'🎬' },
-    { value:6,  label:'Leagues', suffix:'', icon:'🏆' },
-    { value:1,  label:'K+ Readers', suffix:'K+', icon:'👥' },
+    { value: 46, label: 'Articles', suffix: '', icon: '📰' },
+    { value: 7, label: 'Video Posts', suffix: '', icon: '🎬' },
+    { value: 6, label: 'Leagues', suffix: '', icon: '🏆' },
+    { value: 1, label: 'K+ Readers', suffix: 'K+', icon: '👥' },
   ];
   return (
-    <div ref={ref} className="py-8 px-4" style={{ background:'rgba(255,255,255,0.02)', borderTop:'1px solid rgba(255,255,255,0.05)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+    <div ref={ref} className="py-8 px-4" style={{ background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-        {stats.map(({ value, label, suffix, icon }) => {
-          const count = useCounter(value, inView);
-          return (
-            <motion.div key={label} variants={fadeUp} initial="hidden" whileInView="visible" viewport={{once:true}} className="text-center">
-              <div className="text-2xl mb-1">{icon}</div>
-              <div style={{ fontFamily:"'Bebas Neue', sans-serif", fontSize:'2.5rem', color:'#22c55e', textShadow:'0 0 20px rgba(34,197,94,0.4)' }}>
-                {count}{suffix}
-              </div>
-              <div style={{ fontFamily:"'Montserrat', sans-serif", fontSize:'0.7rem', textTransform:'uppercase', letterSpacing:'0.1em', color:'#6b7280' }}>
-                {label}
-              </div>
-            </motion.div>
-          );
-        })}
+        {stats.map((stat) => (
+          <StatItem key={stat.label} {...stat} inView={inView} />
+        ))}
       </div>
     </div>
   );
 }
 
 /* ── Video cycling strip ── */
-function VideoCyclingStrip() {
+function VideoCyclingStrip({ videoPosts }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [hoveredSidebar, setHoveredSidebar] = useState(null); // index hovered in sidebar, or null
@@ -219,10 +217,11 @@ function VideoCyclingStrip() {
 
   /* Main player auto-cycle — pauses when main player is hovered OR sidebar is hovered */
   useEffect(() => {
+    if (!videoPosts || videoPosts.length === 0) return;
     if (paused || hoveredSidebar !== null) return;
     const t = setInterval(() => setActiveIdx(i => (i + 1) % videoPosts.length), 10000);
     return () => clearInterval(t);
-  }, [paused, hoveredSidebar]);
+  }, [paused, hoveredSidebar, videoPosts]);
 
   /* Reset main player on active change */
   useEffect(() => {
@@ -456,19 +455,23 @@ function FixturesPreview() {
 }
 
 /* ── Featured cycling carousel ── */
-function FeaturedCarousel() {
+function FeaturedCarousel({ allPosts }) {
   const [idx, setIdx] = useState(0);
   const [direction, setDirection] = useState(1);
 
   const advance = (dir) => {
+    if (!allPosts || allPosts.length === 0) return;
     setDirection(dir);
     setIdx(i => (i + dir + allPosts.length) % allPosts.length);
   };
 
   useEffect(() => {
+    if (!allPosts || allPosts.length === 0) return;
     const t = setInterval(() => advance(1), 5000);
     return () => clearInterval(t);
-  }, []);
+  }, [allPosts]);
+
+  if (!allPosts || allPosts.length === 0) return null;
 
   const visible = [
     allPosts[idx % allPosts.length],
@@ -576,6 +579,35 @@ function SocialSection() {
    MAIN HOMEPAGE
 ══════════════════════════════════════════════════════════════ */
 export default function Homepage() {
+  const [featuredPosts, setFeaturedPosts] = useState([]);
+  const [recentPosts, setRecentPosts] = useState([]);
+  const [allPosts, setAllPosts] = useState([]);
+  const [videoPosts, setVideoPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const [featured, recent, all] = await Promise.all([
+          getFeaturedPosts(),
+          getRecentPosts(9),
+          getAllPosts({ limit: 20 })
+        ]);
+        
+        setFeaturedPosts(featured);
+        setRecentPosts(recent);
+        setAllPosts(all.posts || []);
+        setVideoPosts((all.posts || []).filter(p => p.video).slice(0, 7));
+      } catch (error) {
+        console.error("Error fetching homepage data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
   /* DeviceOrientation parallax (mobile) */
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   useEffect(() => {
@@ -588,6 +620,14 @@ export default function Homepage() {
     window.addEventListener('deviceorientation', handler, true);
     return () => window.removeEventListener('deviceorientation', handler, true);
   }, []);
+
+  if (loading && allPosts.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#030712]">
+        <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div style={{ background:'var(--color-bg)', minHeight:'100vh' }}>
@@ -739,13 +779,13 @@ export default function Homepage() {
       </section>
 
       {/* ── VIDEO CYCLING STRIP ────────────────────────────────── */}
-      <VideoCyclingStrip />
+      <VideoCyclingStrip videoPosts={videoPosts} />
 
       {/* ── SOCIAL SECTION ─────────────────────────────────────── */}
       <SocialSection />
 
       {/* ── CYCLING CAROUSEL (all posts) ───────────────────────── */}
-      <FeaturedCarousel />
+      <FeaturedCarousel allPosts={allPosts} />
 
       {/* ── RECENT POSTS GRID ──────────────────────────────────── */}
       <section className="max-w-6xl mx-auto px-4 pb-12">

@@ -441,6 +441,25 @@ async function seed() {
     await Comment.deleteMany({});
     console.log('Cleared existing data');
 
+    // Extract unique authors from posts
+    const authorMap = new Map();
+    posts.forEach(post => {
+      if (!authorMap.has(post.author.name)) {
+        authorMap.set(post.author.name, {
+          username: post.author.name,
+          email: `${post.author.name.toLowerCase().replace(/\s+/g, '.')}@5sarena.com`,
+          password: 'password123',
+          role: 'author',
+          avatar: post.author.image,
+          bio: `A passionate writer at 5s Arena Blog, covering ${post.category.toLowerCase()} and the beautiful game.`
+        });
+      }
+    });
+
+    // Create author users
+    const authorUsers = await User.insertMany(Array.from(authorMap.values()));
+    console.log(`${authorUsers.length} author users created`);
+
     // Create admin user
     const admin = await User.create({
       username: 'admin',
@@ -448,6 +467,7 @@ async function seed() {
       password: 'admin123',
       role: 'admin',
       avatar: '/authors/Jackson Wayne.png',
+      bio: 'Administrator of 5s Arena Blog. Dedicated to bringing you the best football content.'
     });
     console.log('Admin user created:', admin.email);
 

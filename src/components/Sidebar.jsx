@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getPopularPosts } from "@/services/postService";
-import { authors } from "@/data/posts";
+import { getPopularPosts, getAuthors } from "@/services/postService";
 import PollWidget from "@/components/PollWidget";
 import { BuyMeACoffeeCard } from "@/components/BuyMeACoffee";
 import ReadingHistory from "@/components/ReadingHistory";
@@ -21,17 +20,34 @@ const categoryGradients = {
 };
 
 export default function Sidebar() {
-  const popularPosts = getPopularPosts(5);
+  const [popularPosts, setPopularPosts] = useState([]);
+  const [spotlightAuthor, setSpotlightAuthor] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const [sidebarBg] = useState(() => {
     const num = Math.floor(Math.random() * 5) + 1;
     return `/sidebar-backgrounds/sidebar-background-${num}.jpg`;
   });
-  const [spotlightAuthor] = useState(() => {
-    const names = Object.keys(authors);
-    return names[Math.floor(Math.random() * names.length)];
-  });
 
-  const author = authors[spotlightAuthor];
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [posts, authors] = await Promise.all([
+          getPopularPosts(5),
+          getAuthors()
+        ]);
+        setPopularPosts(posts);
+        if (authors && authors.length > 0) {
+          setSpotlightAuthor(authors[Math.floor(Math.random() * authors.length)]);
+        }
+      } catch (err) {
+        console.error("Sidebar data fetch failed:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   return (
     <aside className="space-y-6">
@@ -132,29 +148,31 @@ export default function Sidebar() {
       </motion.div>
 
       {/* Author Spotlight */}
-      <motion.div
-        className="glass-card rounded-2xl p-5 text-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.15 }}
-      >
-        <h4 style={{ fontFamily: "'Oswald',sans-serif", fontSize: "1rem", color: "#f9fafb", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "1rem" }}>
-          Author Spotlight
-        </h4>
-        <img
-          src={author?.image}
-          alt={spotlightAuthor}
-          className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
-          style={{ border: "2px solid rgba(34,197,94,0.3)", boxShadow: "0 0 16px rgba(34,197,94,0.2)" }}
-          onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(spotlightAuthor)}&background=16a34a&color=fff`; }}
-        />
-        <h5 style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", fontSize: "0.95rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          {spotlightAuthor}
-        </h5>
-        <p style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.8rem", lineHeight: 1.5, marginTop: "0.5rem" }}>
-          {author?.bio}
-        </p>
-      </motion.div>
+      {spotlightAuthor && (
+        <motion.div
+          className="glass-card rounded-2xl p-5 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.15 }}
+        >
+          <h4 style={{ fontFamily: "'Oswald',sans-serif", fontSize: "1rem", color: "#f9fafb", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "1rem" }}>
+            Author Spotlight
+          </h4>
+          <img
+            src={spotlightAuthor.image}
+            alt={spotlightAuthor.name}
+            className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
+            style={{ border: "2px solid rgba(34,197,94,0.3)", boxShadow: "0 0 16px rgba(34,197,94,0.2)" }}
+            onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(spotlightAuthor.name)}&background=16a34a&color=fff`; }}
+          />
+          <h5 style={{ fontFamily: "'Oswald',sans-serif", color: "#f9fafb", fontSize: "0.95rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            {spotlightAuthor.name}
+          </h5>
+          <p style={{ fontFamily: "'Inter',sans-serif", color: "#9ca3af", fontSize: "0.8rem", lineHeight: 1.5, marginTop: "0.5rem" }}>
+            {spotlightAuthor.bio}
+          </p>
+        </motion.div>
+      )}
 
       {/* Weekly Poll */}
       <PollWidget

@@ -20,10 +20,14 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
     },
+    bio: {
+      type: String,
+      default: "Football enthusiast and storyteller.",
+    },
     role: {
       type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
+      enum: ['reader', 'author', 'admin'],
+      default: 'reader',
     },
   },
   {

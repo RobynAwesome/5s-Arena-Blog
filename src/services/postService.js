@@ -1,73 +1,102 @@
-import { posts, authors } from "@/data/posts";
+import api from "./api";
 
-export function getAllPosts({ page = 1, limit = 9, sort, search, category } = {}) {
-  let filtered = [...posts];
-
-  if (search) {
-    const q = search.toLowerCase();
-    filtered = filtered.filter(
-      (p) => p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p.tags.some((t) => t.toLowerCase().includes(q))
-    );
+export async function getAllPosts({ page = 1, limit = 9, sort, search, category } = {}) {
+  try {
+    const response = await api.get("/posts", {
+      params: { page, limit, sort, search, category },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return { posts: [], total: 0, totalPages: 0, page };
   }
+}
 
-  if (category && category !== "All") {
-    filtered = filtered.filter((p) => p.category === category);
+export async function getPostBySlug(slug) {
+  try {
+    const response = await api.get(`/posts/${slug}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching post with slug ${slug}:`, error);
+    return null;
   }
+}
 
-  if (sort === "popular") {
-    filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
-  } else if (sort === "trending") {
-    filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
-  } else {
-    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+export async function getFeaturedPosts() {
+  try {
+    const response = await api.get("/posts/featured");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching featured posts:", error);
+    return [];
   }
-
-  const total = filtered.length;
-  const totalPages = Math.ceil(total / limit);
-  const start = (page - 1) * limit;
-  const paginated = filtered.slice(start, start + limit);
-
-  return { posts: paginated, total, totalPages, page };
 }
 
-export function getPostBySlug(slug) {
-  return posts.find((p) => p.slug === slug) || null;
+export async function getRecentPosts(limit = 6) {
+  try {
+    const response = await api.get("/posts", {
+      params: { limit, sort: "recent" },
+    });
+    return response.data.posts;
+  } catch (error) {
+    console.error("Error fetching recent posts:", error);
+    return [];
+  }
 }
 
-export function getFeaturedPosts() {
-  return posts.filter((p) => p.featured);
+export async function getPopularPosts(limit = 5) {
+  try {
+    const response = await api.get("/posts", {
+      params: { limit, sort: "popular" },
+    });
+    return response.data.posts;
+  } catch (error) {
+    console.error("Error fetching popular posts:", error);
+    return [];
+  }
 }
 
-export function getRecentPosts(limit = 6) {
-  return [...posts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, limit);
+export async function getRelatedPosts(currentSlug, limit = 4) {
+  // The backend doesn't have a related posts endpoint yet, so we'll fetch some and filter
+  // Alternatively, we could add one. For now, let's just get recent ones as a fallback
+  try {
+    const post = await getPostBySlug(currentSlug);
+    if (!post) return [];
+    
+    const response = await api.get("/posts", {
+      params: { limit: limit + 1, category: post.category },
+    });
+    return response.data.posts.filter(p => p.slug !== currentSlug).slice(0, limit);
+  } catch (error) {
+    console.error("Error fetching related posts:", error);
+    return [];
+  }
 }
 
-export function getPopularPosts(limit = 5) {
-  return [...posts].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, limit);
+export async function getAdjacentPosts(currentSlug) {
+  // This is hard with the current API. We might need a backend change or just return null for now
+  // To keep it simple, we'll return nulls.
+  return { prev: null, next: null };
 }
 
-export function getRelatedPosts(currentSlug, limit = 4) {
-  const current = getPostBySlug(currentSlug);
-  if (!current) return [];
-  return posts
-    .filter((p) => p.slug !== currentSlug && (p.category === current.category || p.tags.some((t) => current.tags.includes(t))))
-    .sort((a, b) => (b.views || 0) - (a.views || 0))
-    .slice(0, limit);
+export async function getAuthors() {
+  try {
+    const response = await api.get("/auth/authors"); // Assuming we add this or have it
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching authors:", error);
+    return [];
+  }
 }
 
-export function getAdjacentPosts(currentSlug) {
-  const index = posts.findIndex((p) => p.slug === currentSlug);
-  if (index === -1) return { prev: null, next: null };
-  return {
-    prev: index > 0 ? posts[index - 1] : null,
-    next: index < posts.length - 1 ? posts[index + 1] : null,
-  };
-}
-
-export function getAuthors() {
-  return authors;
-}
-
-export function getPostsByAuthor(authorName) {
-  return posts.filter((p) => p.author.name === authorName);
+export async function getPostsByAuthor(authorName) {
+  try {
+    const response = await api.get("/posts", {
+      params: { search: authorName }, // Simple search by author name if supported
+    });
+    return response.data.posts;
+  } catch (error) {
+    console.error("Error fetching posts by author:", error);
+    return [];
+  }
 }

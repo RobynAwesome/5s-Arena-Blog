@@ -101,13 +101,40 @@ export default function SinglePostPage() {
   const { addToHistory } = useReadingHistory();
   const { showToast } = useToast();
 
-  const post = useMemo(() => getPostBySlug(slug), [slug]);
-  const related = useMemo(() => {
-    let r = post ? getRelatedPosts(slug, 6) : [];
-    if (categoryFilter) r = r.filter(p => p.category === categoryFilter);
-    return r.slice(0, 4);
-  }, [slug, post, categoryFilter]);
-  const adjacent = useMemo(() => (post ? getAdjacentPosts(slug) : { prev: null, next: null }), [slug, post]);
+  const [post, setPost] = useState(null);
+  const [related, setRelated] = useState([]);
+  const [adjacent, setAdjacent] = useState({ prev: null, next: null });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPostData() {
+      if (!slug) return;
+      setLoading(true);
+      try {
+        const p = await getPostBySlug(slug);
+        setPost(p);
+        if (p) {
+          const [rel, adj] = await Promise.all([
+            getRelatedPosts(slug, 6),
+            getAdjacentPosts(slug)
+          ]);
+          setRelated(rel);
+          setAdjacent(adj);
+          addToHistory(p);
+        }
+      } catch (error) {
+        console.error("Error fetching post:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPostData();
+  }, [slug]);
+
+  const filteredRelated = useMemo(() => {
+    if (!categoryFilter) return related.slice(0, 4);
+    return related.filter(p => p.category === categoryFilter).slice(0, 4);
+  }, [related, categoryFilter]);
 
   const comments = useMemo(() => {
     void commentVersion;
@@ -197,6 +224,27 @@ export default function SinglePostPage() {
     setTimeout(() => setCommentSuccess(false), 3000);
   };
 
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const catGradient = post ? (CATEGORY_GRADIENTS[post.category] || CATEGORY_GRADIENTS.default) : "";
+
+  /* ── Extract images from content for Grid view ── */
+  const contentImages = useMemo(() => {
+    if (!post) return [];
+    if (!post.content) return [post.image].filter(Boolean);
+    const matches = post.content.match(/<img[^>]+src="([^"]+)"/g) || [];
+    const srcs = matches.map(m => { const s = m.match(/src="([^"]+)"/); return s ? s[1] : null; }).filter(Boolean);
+    if (post.image) srcs.unshift(post.image);
+    return srcs;
+  }, [post]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#030712]">
+        <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center" style={{ background: "var(--color-bg)" }}>
@@ -214,18 +262,6 @@ export default function SinglePostPage() {
       </div>
     );
   }
-
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const catGradient = CATEGORY_GRADIENTS[post.category] || CATEGORY_GRADIENTS.default;
-
-  /* ── Extract images from content for Grid view ── */
-  const contentImages = useMemo(() => {
-    if (!post.content) return [];
-    const matches = post.content.match(/<img[^>]+src="([^"]+)"/g) || [];
-    const srcs = matches.map(m => { const s = m.match(/src="([^"]+)"/); return s ? s[1] : null; }).filter(Boolean);
-    if (post.image) srcs.unshift(post.image);
-    return srcs;
-  }, [post]);
 
   return (
     <div style={{ background: "var(--color-bg)", minHeight: "100vh" }}>
@@ -646,7 +682,7 @@ export default function SinglePostPage() {
             <TableOfContents content={post.content} />
 
             {/* Related Articles */}
-            <RelatedArticles posts={related} />
+            <RelatedArticles posts={filteredRelated} />
 
             {/* Fixtures + Standings + League CTA */}
             <InPostFixturesWidget />

@@ -4,7 +4,7 @@ import { motion, useInView } from "framer-motion";
 import { getAuthors, getPostsByAuthor } from "@/services/postService";
 
 /* ── Data ── */
-const authorList = Object.values(getAuthors());
+/* authorList is now fetched via state */
 
 /* ── Animation variants ── */
 const fadeUp  = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 22 } } };
@@ -115,9 +115,24 @@ function StatsBar() {
    ABOUT PAGE
    ══════════════════════════════════════════════════ */
 export default function AboutPage() {
+  const [authorList, setAuthorList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     document.title = "About — 5s Arena Blog";
     window.scrollTo(0, 0);
+
+    async function fetchAuthors() {
+      try {
+        const data = await getAuthors();
+        setAuthorList(data || []);
+      } catch (err) {
+        console.error("Failed to fetch authors:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAuthors();
   }, []);
 
   return (

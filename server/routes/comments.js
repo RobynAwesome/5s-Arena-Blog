@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Comment from '../models/Comment.js';
+import { protect, authorize } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -15,8 +16,8 @@ router.get('/:postId', async (req, res) => {
   }
 });
 
-// POST /:postId - add comment to a post
-router.post('/:postId', async (req, res) => {
+// POST /:postId - add comment to a post (Registered users only)
+router.post('/:postId', protect, async (req, res) => {
   try {
     const comment = await Comment.create({
       postId: req.params.postId,
@@ -30,8 +31,8 @@ router.post('/:postId', async (req, res) => {
   }
 });
 
-// DELETE /:id - delete a comment
-router.delete('/:id', async (req, res) => {
+// DELETE /:id - delete a comment (Admins only)
+router.delete('/:id', protect, authorize('admin'), async (req, res) => {
   try {
     const comment = await Comment.findByIdAndDelete(req.params.id);
     if (!comment) return res.status(404).json({ error: 'Comment not found' });

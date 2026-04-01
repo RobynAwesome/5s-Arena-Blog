@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getAuthors, getPostsByAuthor } from "@/services/postService";
@@ -12,14 +12,56 @@ const categoryColors = {
 export default function AuthorProfilePage() {
   const { name } = useParams();
   const decodedName = decodeURIComponent(name);
-  const authors = getAuthors();
-  const author = authors[decodedName];
-  const authorPosts = getPostsByAuthor(decodedName);
+  const [author, setAuthor] = useState(null);
+  const [authorPosts, setAuthorPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = author ? `${decodedName} — 5s Arena Blog` : "Author Not Found";
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const [authors, posts] = await Promise.all([
+          getAuthors(),
+          getPostsByAuthor(decodedName)
+        ]);
+        
+        // authors is now an array
+        const found = authors.find(a => a.name === decodedName);
+        setAuthor(found);
+        setAuthorPosts(posts || []);
+      } catch (err) {
+        console.error("Failed to fetch author data:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [decodedName]);
+
+  useEffect(() => {
+    document.title = author ? `${decodedName} — 5s Arena Blog` : loading ? "Loading..." : "Author Not Found";
     window.scrollTo(0, 0);
-  }, [decodedName, author]);
+  }, [decodedName, author, loading]);
+
+  const categoryBreakdown = useMemo(() => {
+    const breakdown = {};
+    authorPosts.forEach(p => {
+      breakdown[p.category] = (breakdown[p.category] || 0) + 1;
+    });
+    return breakdown;
+  }, [authorPosts]);
+
+  const totalViews = useMemo(() => {
+    return authorPosts.reduce((sum, p) => sum + (p.views || 0), 0);
+  }, [authorPosts]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#030712]">
+        <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!author) {
     return (
@@ -28,7 +70,7 @@ export default function AuthorProfilePage() {
           <div className="text-5xl mb-4">🔍</div>
           <h2 style={{ fontFamily: "'Bebas Neue',Impact,sans-serif", color: "#f9fafb", fontSize: "2rem" }}>Author Not Found</h2>
           <p style={{ fontFamily: "'Inter',sans-serif", color: "#6b7280", marginTop: "0.5rem", marginBottom: "1.5rem" }}>
-            We couldn't find an author named "{decodedName}".
+            We couldn&apos;t find an author named &quot;{decodedName}&quot;.
           </p>
           <Link to="/authors">
             <motion.button className="btn-primary px-6 py-2.5 rounded-xl font-bold text-white text-sm"
@@ -40,13 +82,6 @@ export default function AuthorProfilePage() {
       </div>
     );
   }
-
-  // Get category breakdown
-  const categoryBreakdown = {};
-  authorPosts.forEach(p => {
-    categoryBreakdown[p.category] = (categoryBreakdown[p.category] || 0) + 1;
-  });
-  const totalViews = authorPosts.reduce((sum, p) => sum + (p.views || 0), 0);
 
   return (
     <div style={{ background: "var(--color-bg)", minHeight: "100vh" }}>

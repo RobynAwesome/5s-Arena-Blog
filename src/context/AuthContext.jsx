@@ -10,7 +10,7 @@ import { jwtDecode } from "jwt-decode";
 
 // IMPORTANT: Add your backend API URL to your .env file
 // Example: VITE_API_URL=https://fivesarena.com/api
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 // Set your Google Client ID here or in .env as VITE_GOOGLE_CLIENT_ID
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
@@ -33,8 +33,7 @@ export function AuthProvider({ children }) {
     if (token) {
       const fetchProfile = async () => {
         try {
-          const response = await fetch(`${API_URL}/auth/profile`, {
-            // Changed from /auth/me to /auth/profile
+          const response = await fetch(`${API_URL}/auth/me`, {
             headers: getAuthHeaders(),
           });
           if (response.ok) {
@@ -70,7 +69,7 @@ export function AuthProvider({ children }) {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || "Invalid email or password.",
+          error: data.error || data.message || "Invalid email or password.",
         };
       }
       localStorage.setItem("5s_token", data.token);
@@ -94,7 +93,7 @@ export function AuthProvider({ children }) {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || "Registration failed.",
+          error: data.error || data.message || "Registration failed.",
         };
       }
       localStorage.setItem("5s_token", data.token);
@@ -118,7 +117,7 @@ export function AuthProvider({ children }) {
       if (!response.ok) {
         return {
           success: false,
-          error: data.message || "Google sign-in failed.",
+          error: data.error || data.message || "Google sign-in failed.",
         };
       }
       localStorage.setItem("5s_token", data.token);
@@ -140,7 +139,7 @@ export function AuthProvider({ children }) {
   const updateProfile = async (updates) => {
     if (!user) return { success: false, error: "Not authenticated." };
     try {
-      const response = await fetch(`${API_URL}/auth/profile`, {
+      const response = await fetch(`${API_URL}/auth/me`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -150,9 +149,9 @@ export function AuthProvider({ children }) {
       });
       const data = await response.json();
       if (!response.ok) {
-        return { success: false, error: data.message || "Update failed." };
+        return { success: false, error: data.error || data.message || "Update failed." };
       }
-      setUser(data.user);
+      setUser(data);
       return { success: true };
     } catch (error) {
       console.error("Profile update error:", error);

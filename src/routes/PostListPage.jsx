@@ -13,6 +13,10 @@ export default function PostListPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [viewLayout, setViewLayout] = useState("grid"); // grid | list
   const [page, setPage] = useState(1);
+  const [posts, setPosts] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+
   const sort = searchParams.get("sort");
   const search = searchParams.get("search") || "";
   const categoryParam = searchParams.get("category");
@@ -23,8 +27,20 @@ export default function PostListPage() {
     window.scrollTo(0, 0);
   }, [search, sort]);
 
-  const { posts, totalPages } = useMemo(() => {
-    return getAllPosts({ page, limit: POSTS_PER_PAGE, sort, search, category: activeCategory });
+  useEffect(() => {
+    async function fetchPosts() {
+      setLoading(true);
+      try {
+        const data = await getAllPosts({ page, limit: POSTS_PER_PAGE, sort, search, category: activeCategory });
+        setPosts(data.posts || []);
+        setTotalPages(data.totalPages || 1);
+      } catch (error) {
+        console.error("Failed to fetch posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPosts();
   }, [page, sort, search, activeCategory]);
 
   return (

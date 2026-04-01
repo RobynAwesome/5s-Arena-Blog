@@ -6,7 +6,12 @@ const MAX_ITEMS = 20;
 function loadHistory() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const data = raw ? JSON.parse(raw) : [];
+    // Migration: if items are just IDs (strings/numbers), clear it to avoid errors
+    if (data.length > 0 && typeof data[0] !== 'object') {
+      return [];
+    }
+    return data;
   } catch {
     return [];
   }
@@ -23,14 +28,24 @@ function saveHistory(history) {
 export function useReadingHistory() {
   const [history, setHistory] = useState(loadHistory);
 
-  const addToHistory = useCallback((postId) => {
+  const addToHistory = useCallback((post) => {
+    if (!post || !post.id) return;
+
     setHistory((prev) => {
-      // If postId is already the most recent entry, do nothing
-      if (prev[0] === postId) return prev;
+      // If post.id is already the most recent entry, do nothing
+      if (prev[0]?.id === post.id) return prev;
+
+      // Extract only needed fields to save space
+      const minimalPost = {
+        id: post.id,
+        slug: post.slug,
+        title: post.title,
+        image: post.image || post.coverImage,
+      };
 
       // Remove existing occurrence (if any), then prepend
-      const filtered = prev.filter((id) => id !== postId);
-      const updated = [postId, ...filtered].slice(0, MAX_ITEMS);
+      const filtered = prev.filter((p) => p.id !== post.id);
+      const updated = [minimalPost, ...filtered].slice(0, MAX_ITEMS);
 
       saveHistory(updated);
       return updated;

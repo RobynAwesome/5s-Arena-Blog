@@ -2,8 +2,29 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { OAuth2Client } from "google-auth-library";
+import { protect } from "../middleware/auth.js";
 
 const router = Router();
+
+// GET /authors - list all authors and admins
+router.get("/authors", async (req, res) => {
+  try {
+    const authors = await User.find({ role: { $in: ["author", "admin"] } })
+      .select("username avatar bio role");
+    
+    // Map backend to frontend expectations
+    const mapped = authors.map(a => ({
+      name: a.username,
+      image: a.avatar,
+      bio: a.bio,
+      role: a.role
+    }));
+    
+    res.json(mapped);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // POST /register
 router.post("/register", async (req, res) => {
@@ -77,33 +98,31 @@ router.post("/login", async (req, res) => {
 });
 
 // GET /me - get current user from JWT (protected route)
-router.get("/me", async (req, res) => {
+router.get("/me", protect, async (req, res) => {
+  res.json(req.user);
+});
+
+// PUT /me - update current user profile (protected route)
+router.put("/me", protect, async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res
-        .status(401)
-        .json({ error: "Authentication failed: No token provided" });
-    }
+    const { username, avatar } = req.body;
+    const user = await User.findById(req.user._id);
 
-    // Extract token
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (username) user.username = username;
+    if (avatar) user.avatar = avatar;
 
-    const user = await User.findById(decoded.id).select("-password -__v"); // Exclude password and __v field
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    // Return a simplified user object, without the full Mongoose model
-    res.json(user);
+    await user.save();
+
+    res.json({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+    });
   } catch (err) {
-    console.error("Profile fetch error:", err); // More detailed logging
-    if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
-      return res
-        .status(401)
-        .json({ error: "Authentication failed: Invalid or expired token." });
-    }
-    res.status(500).json({ error: "Server error during profile fetch." }); // Generic message to client
+    console.error("Profile update error:", err);
+    res.status(500).json({ error: "Server error during profile update." });
   }
 });
 

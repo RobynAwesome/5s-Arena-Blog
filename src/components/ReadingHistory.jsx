@@ -2,7 +2,6 @@ import { useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useReadingHistory } from "@/hooks/useReadingHistory";
-import { getAllPosts } from "@/services/postService";
 
 const DISPLAY_LIMIT = 8;
 
@@ -10,14 +9,10 @@ export default function ReadingHistory() {
   const { history, clearHistory } = useReadingHistory();
   const stripRef = useRef(null);
 
-  const allPosts = useMemo(() => getAllPosts({ page: 1, limit: 100 }).posts, []);
-
   const recentPosts = useMemo(() => {
-    return history
-      .slice(0, DISPLAY_LIMIT)
-      .map((id) => allPosts.find((p) => p.id === id))
-      .filter(Boolean);
-  }, [history, allPosts]);
+    // history now contains minimal post objects
+    return history.slice(0, DISPLAY_LIMIT).filter(Boolean);
+  }, [history]);
 
   if (recentPosts.length === 0) return null;
 

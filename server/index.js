@@ -8,7 +8,7 @@ import { dirname, join } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-dotenv.config({ path: join(__dirname, ".env") });
+dotenv.config();
 
 import postRoutes from "./routes/posts.js";
 import authRoutes from "./routes/auth.js";
@@ -26,6 +26,15 @@ app.use(express.json());
 app.use("/api/posts", postRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/comments", commentRoutes);
+
+// Serve static assets in production
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(join(__dirname, "../dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(join(__dirname, "../dist", "index.html"));
+  });
+}
 
 // Health check
 app.get("/api/health", (req, res) => {

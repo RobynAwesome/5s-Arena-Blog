@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Post from '../models/Post.js';
+import { protect, authorize } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -84,8 +85,8 @@ router.get('/:slug', async (req, res) => {
   }
 });
 
-// POST / - create post
-router.post('/', async (req, res) => {
+// POST / - create post (Authors/Admins only)
+router.post('/', protect, authorize('author', 'admin'), async (req, res) => {
   try {
     const data = req.body;
     data.slug = generateSlug(data.title);
@@ -99,8 +100,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /:id - update post
-router.put('/:id', async (req, res) => {
+// PUT /:id - update post (Authors/Admins only)
+router.put('/:id', protect, authorize('author', 'admin'), async (req, res) => {
   try {
     const data = req.body;
     if (data.title) {
@@ -120,8 +121,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /:id - delete post
-router.delete('/:id', async (req, res) => {
+// DELETE /:id - delete a post (Admins only)
+router.delete('/:id', protect, authorize('admin'), async (req, res) => {
   try {
     const post = await Post.findByIdAndDelete(req.params.id);
     if (!post) return res.status(404).json({ error: 'Post not found' });

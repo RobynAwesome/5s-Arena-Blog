@@ -6,7 +6,9 @@ This document outlines the steps required to deploy the **5s Arena Blog** (Front
 - [ ] Create a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account and a cluster.
 - [ ] Create an [ImageKit.io](https://imagekit.io/) account for image CDN.
 - [ ] Create a [Google Cloud Console](https://console.cloud.google.com/) project for Google OAuth (if using).
-- [ ] Choose deployment platforms (e.g., **Vercel/Netlify** for Frontend, **Render/Heroku/Railway** for Backend).
+- [ ] Choose deployment platforms:
+  - **Option A (Recommended):** Single deployment (e.g., Render, Railway, Fly.io, Heroku) serving both Frontend and Backend.
+  - **Option B:** Separate deployment (e.g., Vercel/Netlify for Frontend, Render/Heroku for Backend).
 
 ## 2. Backend Deployment (Express API)
 - [ ] **Database Connection:** 
@@ -16,11 +18,12 @@ This document outlines the steps required to deploy the **5s Arena Blog** (Front
   - `MONGODB_URI`: Your MongoDB Atlas connection string.
   - `JWT_SECRET`: A strong, random string for signing tokens.
   - `CLIENT_URL`: The URL of your deployed frontend (e.g., `https://5s-arena-blog.vercel.app`).
+  - `NODE_ENV`: Set to `production` (enables static file serving from `dist/`).
   - `PORT`: Usually handled by the platform (default `5000`).
-- [ ] **Code Changes Required:**
-  - [ ] Update `server/index.js` CORS settings if necessary (already uses `CLIENT_URL` env).
-- [ ] **Build Command:** `npm install`
+  - `GOOGLE_CLIENT_ID`: Your Google OAuth Client ID (needed for backend verification).
+- [ ] **Build Command:** `npm install && npm run build`
 - [ ] **Start Command:** `npm run server`
+- [ ] **Database Seeding (Optional):** Run `node server/seed.js` once after the initial deployment to populate the database with default posts and authors. **Warning:** This will clear existing data in the database.
 
 ## 3. Frontend Deployment (React/Vite)
 - [ ] **Environment Variables:** Set the following in your frontend build settings:
@@ -29,7 +32,10 @@ This document outlines the steps required to deploy the **5s Arena Blog** (Front
   - `VITE_IK_PUBLIC_KEY`: Your ImageKit public key.
   - `VITE_GOOGLE_CLIENT_ID`: Your Google OAuth Client ID.
 - [x] **Code Changes Required:**
-  - [x] **CRITICAL:** Update `src/services/api.js` to use `import.meta.env.VITE_API_BASE_URL` instead of hardcoded `localhost:5000`. (Done)
+  - [x] **CRITICAL:** Unified API URL to use `VITE_API_BASE_URL` across all services. (Done)
+  - [x] **CRITICAL:** Fixed authentication endpoint in `AuthContext.jsx` to use `/auth/me`. (Done)
+  - [x] **SECURITY:** Added authentication middleware to protect post and comment routes. (Done)
+  - [x] **CONFIG:** Added static file serving to the Express server for single-service deployment. (Done)
 - [ ] **Build Settings:**
   - **Build Command:** `npm run build`
   - **Output Directory:** `dist`
@@ -37,11 +43,13 @@ This document outlines the steps required to deploy the **5s Arena Blog** (Front
 ## 4. Final Verification
 - [ ] Verify frontend can reach backend API.
 - [ ] Test Login/Registration flow.
+- [ ] Test persistence of user session on page refresh (requires backend `GET /auth/me`).
 - [ ] Test Image uploads/display via ImageKit.
 - [ ] Verify SEO meta tags are working on social media (using tools like [metatags.io](https://metatags.io/)).
 
 ## 5. Security Checklist
-- [ ] Ensure `JWT_SECRET` is never committed to Git.
-- [ ] Use `HTTPS` for both frontend and backend.
-- [ ] Set `secure: true` for any cookies if applicable.
-- [ ] Verify CORS is restricted to your frontend domain in production.
+- [x] **JWT_SECRET:** Ensure it is a strong secret on the server. (Handled)
+- [x] **Route Protection:** Verify that only authors/admins can create/edit/delete posts. (Added middleware)
+- [ ] **HTTPS:** Use `HTTPS` for both frontend and backend.
+- [ ] **CORS:** Verify CORS is restricted to your frontend domain in production via `CLIENT_URL` env.
+- [ ] **Secrets:** Ensure no `.env` files with production secrets are committed to Git.

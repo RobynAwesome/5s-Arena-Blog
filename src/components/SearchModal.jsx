@@ -38,14 +38,18 @@ export default function SearchModal() {
   }, [open]);
 
   // Search
-  const handleSearch = useCallback((value) => {
+  const handleSearch = useCallback(async (value) => {
     setQuery(value);
     if (!value.trim()) {
       setResults([]);
       return;
     }
-    const { posts } = getAllPosts({ page: 1, limit: 100, search: value });
-    setResults(posts.slice(0, 8));
+    try {
+      const data = await getAllPosts({ page: 1, limit: 10, search: value });
+      setResults(data.posts?.slice(0, 8) || []);
+    } catch (error) {
+      console.error("Search failed:", error);
+    }
   }, []);
 
   const goTo = (slug) => {
@@ -177,7 +181,7 @@ export default function SearchModal() {
                 ) : (
                   <div className="px-5 py-10 text-center">
                     <p style={{ color: "#6b7280", fontFamily: "'Inter',sans-serif", fontSize: "0.85rem" }}>
-                      No posts found for "{query}"
+                      No posts found for &quot;{query}&quot;
                     </p>
                   </div>
                 )}
