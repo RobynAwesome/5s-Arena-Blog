@@ -1,4 +1,4 @@
-import { IKImage } from "imagekitio-react";
+import { IKImage } from "@imagekit/react";
 
 const Image = ({ src, className, w, h, alt }) => {
   const endpoint = import.meta.env.VITE_IK_URL_ENDPOINT;
