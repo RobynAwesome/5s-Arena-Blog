@@ -1,131 +1,69 @@
-<div align="center">
-  <img src="public/logo.png" alt="5s Arena Blog Logo" width="200"/>
-  <h1>5's Arena Blog | Football Media Platform</h1>
-  <p><strong>A professional-grade football content platform focused on 5-a-side culture, tactical content, fixtures, community stories, and creator-led publishing.</strong></p>
-</div>
+# FivesArena — Football Culture & Stories | KPGS Ecosystem
+
+> *"I have fought the good fight, I have finished the race, I have kept the faith."* — 2 Timothy 4:7
+
+[![KPGS](https://img.shields.io/badge/KPGS-Governed-7b61ff)](https://fivesarena.com)
+[![APWA](https://img.shields.io/badge/APWA-6_Dimensions-00d4aa)](https://fivesarena.com)
+[![SWFUS](https://img.shields.io/badge/SWFUS-Underground-8b4513)](https://fivesarena.com)
+
+## Live
+
+**🌐 [fivesarena.com](https://fivesarena.com)** · **📰 [blog.fivesarena.com](https://blog.fivesarena.com)**
 
 ---
 
-## Tech Stack
+## What Is This
 
-<div align="center">
+FivesArena is the **Ama-Phu Entertainment** sector of the KPGS ecosystem. Football culture, stories, legends, and booking.
 
-### Frontend
-![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![React Router](https://img.shields.io/badge/React_Router-6.30-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white)
-![TypeScript Ready](https://img.shields.io/badge/TypeScript_Ready-Configured-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.38-0055FF?style=for-the-badge&logo=framer&logoColor=white)
+An **Adaptive PWA** — the standard that ALL KPGS domains follow. 6-dimension adaptation.
 
-### Backend & Services
-![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Express](https://img.shields.io/badge/Express-5.2-000000?style=for-the-badge&logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-8.x-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![Mongoose](https://img.shields.io/badge/Mongoose-9.3-880000?style=for-the-badge&logo=mongoose&logoColor=white)
-![JWT Auth](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge)
-![ImageKit](https://img.shields.io/badge/ImageKit-CDN-2F80ED?style=for-the-badge)
+## Adaptive PWA — 6 Dimensions
 
-</div>
+| # | Dimension | FivesArena Implementation |
+|---|-----------|--------------------------|
+| 1 | **Connectivity** | Offline article cache · Low-data mode for media |
+| 2 | **Role** | Reader · Player · Team manager · Venue owner |
+| 3 | **Urgency** | Standard browse → live match → tournament mode |
+| 4 | **Device** | Mobile-first · Android priority · Stadium kiosk |
+| 5 | **Trust** | Verified match results · Official venue ratings |
+| 6 | **Local Context** | Township · City · League · Language |
 
----
+## KPGS Governance
 
-## Pro-Level Features
+| Module | Status |
+|--------|--------|
+| SeedProtocol | ✅ SWFUS: **Underground** |
+| KCLedger | ✅ Observing |
+| CasseyGuardian | ✅ Teaching |
+| Rushing Protocol | ✅ Creative node — 4-bar bracket |
+| POCEnforcement | ✅ Growing |
 
-### Football Content and Publishing
-* **Modern content hub:** homepage, post feeds, author profiles, and category-driven football storytelling.
-* **Editor workflow:** write and publish capabilities for creators and admins.
-* **Rich media support:** image and video-heavy pages optimized for fan engagement.
-* **Tactical and league pages:** dedicated routes for fixtures, tactics, league updates, and community content.
+## MMAO — Mobile Multi-Agent Orchard
 
-### Platform and Admin Capabilities
-* **Secure authentication layer:** register/login flow with JWT-based backend auth routes.
-* **Comment system:** full post comments flow with backend persistence.
-* **API-first backend:** modular Express routes for posts, auth, and comments.
-* **Mongo-backed content model:** scalable persistence for users, posts, and discussions.
+FivesArena is the **creative node** in the MMAO orchard. The Rushing Protocol validates creative output as Living Proof Human (LPH) evidence.
 
-### User Experience and Performance
-* **Mobile-first responsive UI:** optimized reading and browsing on phones and tablets.
-* **Smooth motion interactions:** Framer Motion transitions for a premium UX feel.
-* **PWA assets included:** manifest and service worker support for progressive enhancement.
-* **SEO and social sharing assets:** robots, RSS feed, and rich media-ready structure.
-
----
-
-## Installation & Setup
-
-**1. Clone the Repository:**
-```bash
-git clone https://github.com/RobynAwesome/5s-Arena-Blog-v2.git
-cd 5s-Arena-Blog
+```
+🌱 PLANT    → Content seeds (articles, match reports, stories)
+💧 WATER    → Community engagement (reads, shares, reactions)
+✂️ PRUNE    → Quality control (Cassey editorial review)
+🌾 HARVEST  → Proven content (verified, cited, referenced)
+🌳 FRUIT    → Cultural impact (LPH creative validation)
 ```
 
-**2. Install Dependencies:**
-```bash
-npm install
-```
+## KPGS Ecosystem Mesh
 
-**3. Configure Environment Variables:**
-Create/update `.env` with your own values:
-```env
-# Frontend
-VITE_IK_URL_ENDPOINT=your_imagekit_url_endpoint
-VITE_IK_PUBLIC_KEY=your_imagekit_public_key
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
+| Node | URL | SWFUS |
+|------|-----|-------|
+| KopanoLabs | [kopanolabs.com](https://kopanolabs.com) | Soil |
+| KRRababalela | [krrababalela.com](https://krrababalela.com) | Sky |
+| KasiLink | [kasilink.com](https://kasilink.com) | Water |
+| CrisisConnect | [crisisconnect.kopanolabs.com](https://crisisconnect.kopanolabs.com) | Fire |
+| **FivesArena** | **[fivesarena.com](https://fivesarena.com)** | **Underground** |
+| KopanoContext | [kopanocontext.kopanolabs.com](https://kopanocontext.kopanolabs.com) | Sky |
 
-# Backend
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-CLIENT_URL=http://localhost:5173
-PORT=5000
-NODE_ENV=development
-```
+## Sovereign System Engineer
 
-**4. Run the App:**
-```bash
-# Frontend
-npm run dev
+**Kholofelo Robyn Rababalela** — Creator of KPGS.
 
-# Backend API (separate terminal)
-npm run server
-```
-
-Visit `http://localhost:5173` to view the app.
-
----
-
-## Project Structure
-
-```text
-src/                # Frontend app (routes, components, contexts, services)
-server/             # Express API (routes, models, middleware, seed)
-public/             # Static assets (logos, posts, backgrounds, videos, manifest)
-```
-
----
-
-## Contributing
-
-We welcome contributions from the community.
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m "Add some AmazingFeature"`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## Support The Creator
-
-Built with love by **Kholofelo Robyn Rababalela**.
-
-* [Buy me a coffee on Ko-fi](https://ko-fi.com/robynawesome)
-* [Support via PayPal](https://www.paypal.me/osheenviews)
-
----
-
-## Stars
-
-If you found this useful, please star the repo:
-
-⭐⭐⭐ **Don't forget to star this repository!** ⭐⭐⭐
+**Jesus is King. Classify before interpret. Receipt or HOLD.**
