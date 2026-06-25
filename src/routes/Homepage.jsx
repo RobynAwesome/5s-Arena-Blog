@@ -21,6 +21,15 @@ const SOCIAL = [
   { href:'https://wa.me/27637820245',                              label:'WhatsApp', color:'#25d366', followers:'Message Us', icon:'💬' },
 ];
 
+const ECOSYSTEM_LINKS = [
+  { label: "KRRababalela", href: "https://krrababalela.com", note: "Chief portfolio", status: "LIVE" },
+  { label: "Kopano Labs", href: "https://kopanolabs.com", note: "Studio lane", status: "LIVE" },
+  { label: "KasiLink", href: "https://kasilink.com", note: "Township network", status: "LIVE" },
+  { label: "Five's Arena", href: "https://fivesarena.com", note: "Venue surface", status: "LIVE" },
+  { label: "Starfall Salvage", href: "https://starfallsalvage.kopanolabs.com", note: "Game lane", status: "LIVE" },
+  { label: "Kopano Context", href: "https://context.kopanolabs.com", note: "Reserved domain", status: "RESERVED" },
+];
+
 /* ── Animation variants ── */
 const fadeUp   = { hidden:{opacity:0,y:30}, visible:{opacity:1,y:0,transition:{type:'spring',stiffness:280,damping:22}} };
 const stagger  = { hidden:{opacity:0}, visible:{opacity:1,transition:{staggerChildren:0.08}} };
@@ -782,6 +791,62 @@ export default function Homepage() {
 
       {/* ── SOCIAL SECTION ─────────────────────────────────────── */}
       <SocialSection />
+
+      <section className="max-w-6xl mx-auto px-4 pb-12">
+        <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{once:true}} className="rounded-[2rem] p-6"
+          style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(34,197,94,0.14)', boxShadow:'0 18px 44px rgba(0,0,0,0.18)' }}>
+          <div className="max-w-3xl">
+            <p style={{ fontFamily:"'Oswald',sans-serif", fontSize:'0.9rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'#22c55e' }}>
+              Kopano-Phu ecosystem
+            </p>
+            <h2 style={{ fontFamily:"'Oswald',sans-serif", fontSize:'2rem', textTransform:'uppercase', letterSpacing:'0.04em', color:'#f9fafb', marginTop:'0.75rem' }}>
+              The blog is one editorial lane in the wider graph
+            </h2>
+            <p style={{ fontFamily:"'Inter',sans-serif", color:'#9ca3af', lineHeight:1.8, marginTop:'1rem', maxWidth:'52rem' }}>
+              Football culture can stay loud and still route cleanly to the portfolio, studio, arena,
+              township work network, and game layer. Kopano Context stays visible, but honestly marked
+              as reserved until the public runtime is owner-proven.
+            </p>
+          </div>
+
+          <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {ECOSYSTEM_LINKS.map((item) => (
+              <motion.a
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-2xl px-4 py-4 no-underline"
+                style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)' }}
+                whileHover={{ y:-3, borderColor:'rgba(34,197,94,0.28)', boxShadow:'0 14px 30px rgba(34,197,94,0.08)' }}
+                whileTap={{ scale:0.98 }}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p style={{ fontFamily:"'Oswald',sans-serif", color:'#f9fafb', fontSize:'0.95rem', margin:0 }}>
+                    {item.label}
+                  </p>
+                  <span style={{
+                    fontFamily:"'Montserrat',sans-serif",
+                    fontSize:'0.6rem',
+                    fontWeight:700,
+                    letterSpacing:'0.14em',
+                    textTransform:'uppercase',
+                    borderRadius:'999px',
+                    padding:'0.3rem 0.5rem',
+                    background: item.status === 'RESERVED' ? 'rgba(245,158,11,0.16)' : 'rgba(34,197,94,0.14)',
+                    color: item.status === 'RESERVED' ? '#fcd34d' : '#86efac',
+                  }}>
+                    {item.status}
+                  </span>
+                </div>
+                <p style={{ fontFamily:"'Inter',sans-serif", color:'#6b7280', fontSize:'0.72rem', letterSpacing:'0.08em', textTransform:'uppercase', marginTop:'0.55rem' }}>
+                  {item.note}
+                </p>
+              </motion.a>
+            ))}
+          </div>
+        </motion.div>
+      </section>
 
       {/* ── CYCLING CAROUSEL (all posts) ───────────────────────── */}
       <FeaturedCarousel allPosts={allPosts} />

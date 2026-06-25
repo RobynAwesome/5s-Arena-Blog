@@ -25,3 +25,7 @@ Sub-brain structure created and synced to MAIN-BRAIN.
 
 **Unverified:** production URL, build state, active task list.
 Owner to confirm on next session open.
+## 2026-06-05 — Ecosystem route alignment
+
+- Added a Kopano-Phu ecosystem section to the blog homepage and footer so the editorial lane now routes cleanly to the portfolio, studio, arena, KasiLink, Starfall Salvage, and reserved Kopano Context.
+- Verification state: `npm run build` PASS on this tranche.

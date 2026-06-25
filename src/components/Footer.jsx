@@ -86,6 +86,45 @@ const LINKEDIN_PROFILES = [
   },
 ];
 
+const ECOSYSTEM_LINKS = [
+  {
+    label: "KRRababalela",
+    href: "https://krrababalela.com",
+    note: "Chief portfolio",
+    status: "LIVE",
+  },
+  {
+    label: "Kopano Labs",
+    href: "https://kopanolabs.com",
+    note: "Studio lane",
+    status: "LIVE",
+  },
+  {
+    label: "KasiLink",
+    href: "https://kasilink.com",
+    note: "Township work network",
+    status: "LIVE",
+  },
+  {
+    label: "Five's Arena",
+    href: "https://fivesarena.com",
+    note: "Venue surface",
+    status: "LIVE",
+  },
+  {
+    label: "Starfall Salvage",
+    href: "https://starfallsalvage.kopanolabs.com",
+    note: "Game lane",
+    status: "LIVE",
+  },
+  {
+    label: "Kopano Context",
+    href: "https://context.kopanolabs.com",
+    note: "Reserved domain",
+    status: "RESERVED",
+  },
+];
+
 /* ── Collapsible section ── */
 function CollapseSection({ title, items, renderItem }) {
   const [open, setOpen] = useState(false);
@@ -333,6 +372,103 @@ export default function Footer() {
               📍 Cape Town, South Africa<br />
               📱 <a href="https://wa.me/27637820245" style={{ color: "#22c55e" }}>WhatsApp Us</a>
             </p>
+          </div>
+        </div>
+
+        <div
+          className="mt-10 rounded-3xl px-5 py-5"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(34,197,94,0.14)",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "'Oswald', sans-serif",
+              fontSize: "0.95rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "#22c55e",
+              margin: 0,
+            }}
+          >
+            Kopano-Phu ecosystem
+          </p>
+          <p
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              color: "#9ca3af",
+              fontSize: "0.9rem",
+              lineHeight: 1.7,
+              marginTop: "0.9rem",
+              maxWidth: "52rem",
+            }}
+          >
+            The blog is the editorial lane in the same public graph as the portfolio, studio,
+            arena, KasiLink, and Starfall. Kopano Context stays visible, but honestly marked as
+            reserved until the public runtime is owner-proven.
+          </p>
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {ECOSYSTEM_LINKS.map((item) => (
+              <motion.a
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-2xl px-4 py-4 no-underline"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+                whileHover={{
+                  y: -3,
+                  borderColor: "rgba(34,197,94,0.28)",
+                  boxShadow: "0 14px 30px rgba(34,197,94,0.08)",
+                }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p
+                    style={{
+                      fontFamily: "'Oswald', sans-serif",
+                      color: "#f9fafb",
+                      fontSize: "0.95rem",
+                      margin: 0,
+                    }}
+                  >
+                    {item.label}
+                  </p>
+                  <span
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.6rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      borderRadius: "999px",
+                      padding: "0.3rem 0.5rem",
+                      background: item.status === "RESERVED" ? "rgba(245,158,11,0.16)" : "rgba(34,197,94,0.14)",
+                      color: item.status === "RESERVED" ? "#fcd34d" : "#86efac",
+                    }}
+                  >
+                    {item.status}
+                  </span>
+                </div>
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#6b7280",
+                    fontSize: "0.72rem",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    marginTop: "0.55rem",
+                  }}
+                >
+                  {item.note}
+                </p>
+              </motion.a>
+            ))}
           </div>
         </div>
 

@@ -1,0 +1,28 @@
+{
+  "schema": "kpgs_gssb_config_v1",
+  "trinity": {
+    "core": "Father — Source of all agents",
+    "altar": "Son — Validation gate",
+    "engine": "Holy Spirit — Distribution power"
+  },
+  "gssb": "5s-Arena-Blog",
+  "slug": "fivesarena-blog",
+  "domain": "blog.fivesarena.com",
+  "nso_group": "NSO-SPORTS",
+  "governance": {
+    "named_agents": [
+      "YASSIE",
+      "CASSEY"
+    ],
+    "named_count": 2,
+    "utility_agents": 50,
+    "total_agents": 52,
+    "pillars": [
+      "COMMUNITY"
+    ]
+  },
+  "apwa_status": "NOT_STARTED",
+  "scripture": "1 Corinthians 12:4-6",
+  "constraint": "I_AM_STATELESS_RENTER_NOT_LANDLORD",
+  "distributed_at": "2026-06-24T07:42:01.952489+00:00"
+}
