@@ -17,6 +17,60 @@ const BASE_NAV_ITEMS = [
 const AUTHOR_ITEM = { icon: "📝", label: "Write",   to: "/write",    hue: 270, color: "#a855f7" };
 const ADMIN_ITEM  = { icon: "⚙️", label: "Admin",   to: "/admin",    hue: 0,   color: "#ef4444" };
 
+const RESERVED_ROOTS = new Set([
+  "posts",
+  "write",
+  "login",
+  "register",
+  "about",
+  "league",
+  "profile",
+  "admin",
+  "fixtures",
+  "author",
+  "most-popular",
+  "authors",
+  "tools",
+  "analytics",
+  "roadmap",
+  "shop",
+  "jobs",
+  "affiliate-disclosure",
+  "donate",
+  "creator",
+  "tactics",
+  "fitness",
+  "community",
+  "terms",
+  "focus",
+]);
+
+function getReaderModeItem(pathname, search = "") {
+  const contextSuffix = search || "";
+  const focusMatch = pathname.match(/^\/focus\/([^/]+)\/?$/);
+  if (focusMatch) {
+    return {
+      icon: "▤",
+      label: "Standard",
+      to: `/${focusMatch[1]}${contextSuffix}`,
+      hue: 145,
+      color: "#22c55e",
+    };
+  }
+
+  const articleMatch = pathname.match(/^\/([^/]+)\/?$/);
+  const slug = articleMatch?.[1];
+  if (!slug || RESERVED_ROOTS.has(slug)) return null;
+
+  return {
+    icon: "◉",
+    label: "Focus",
+    to: `/focus/${slug}${contextSuffix}`,
+    hue: 45,
+    color: "#f59e0b",
+  };
+}
+
 export default function FloatingNavDropdown() {
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -25,8 +79,10 @@ export default function FloatingNavDropdown() {
 
   const isAdmin  = user?.role === "admin";
   const isAuthor = user?.role === "author" || isAdmin;
+  const readerModeItem = getReaderModeItem(location.pathname, location.search);
 
   const NAV_ITEMS = [
+    ...(readerModeItem ? [readerModeItem] : []),
     ...BASE_NAV_ITEMS,
     ...(isAuthor ? [AUTHOR_ITEM] : []),
     ...(isAdmin  ? [ADMIN_ITEM]  : []),
@@ -40,7 +96,7 @@ export default function FloatingNavDropdown() {
   }, []);
 
   /* Close on route change */
-  useEffect(() => { setOpen(false); }, [location.pathname]);
+  useEffect(() => { setOpen(false); }, [location.pathname, location.search]);
 
   if (!visible) return null;
 
@@ -55,7 +111,7 @@ export default function FloatingNavDropdown() {
             : { to: item.to };
 
           return (
-            <motion.div key={item.label}
+            <motion.div key={`${item.label}-${item.to}`}
               initial={{ opacity: 0, x: 40, scale: 0.8 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 40, scale: 0.8 }}
@@ -63,7 +119,6 @@ export default function FloatingNavDropdown() {
               <ItemWrapper {...extraProps}
                 onClick={() => !item.external && setOpen(false)}
                 className="flex items-center gap-2.5 no-underline">
-                {/* Label */}
                 <motion.span
                   className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap"
                   style={{
@@ -79,7 +134,6 @@ export default function FloatingNavDropdown() {
                   {item.label}
                 </motion.span>
 
-                {/* Icon pill */}
                 <motion.div
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
                   style={{
@@ -97,7 +151,6 @@ export default function FloatingNavDropdown() {
         })}
       </AnimatePresence>
 
-      {/* Toggle button */}
       <motion.button
         onClick={() => setOpen(!open)}
         className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
@@ -117,6 +170,8 @@ export default function FloatingNavDropdown() {
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
+        aria-label={open ? "Close quick navigation" : "Open quick navigation"}
+        aria-expanded={open}
       >
         <motion.span className="text-xl" animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.2 }}>
           {open ? "✕" : "⚽"}

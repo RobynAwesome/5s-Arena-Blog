@@ -8,6 +8,7 @@ dotenv.config();
 import postRoutes from "./routes/posts.js";
 import authRoutes from "./routes/auth.js";
 import commentRoutes from "./routes/comments.js";
+import organismRoutes from "./routes/organism.js";
 
 const app = express();
 
@@ -16,6 +17,9 @@ const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 // Middleware
 app.use(cors({ origin: CLIENT_URL }));
 app.use(express.json());
+
+// Public organism context must not depend on MongoDB availability.
+app.use("/api/organism", organismRoutes);
 
 // MongoDB connection (cached for serverless)
 let isConnected = false;
@@ -26,7 +30,7 @@ const connectDB = async () => {
   console.log("Connected to MongoDB");
 };
 
-// Attach DB connection to every request
+// Attach DB connection to database-backed requests.
 app.use(async (req, res, next) => {
   try {
     await connectDB();

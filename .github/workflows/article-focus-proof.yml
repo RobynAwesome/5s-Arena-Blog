@@ -1,0 +1,44 @@
+name: Article Focus Proof
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'server/**'
+      - 'scripts/validate-focus.mjs'
+      - 'package.json'
+      - 'tsconfig.json'
+      - '.github/workflows/article-focus-proof.yml'
+  push:
+    branches:
+      - feat/conviction-editorial-organism
+
+permissions:
+  contents: read
+
+jobs:
+  focus-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Article focus + weather operations contract
+        run: npm run validate:focus
+
+      - name: Organism membrane syntax
+        run: node --check server/index.js && node --check server/routes/organism.js
+
+      - name: TypeScript 7 native typecheck
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
