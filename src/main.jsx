@@ -41,7 +41,7 @@ const TacticsPage             = lazy(() => import("@/routes/TacticsPage.jsx"));
 const FitnessPage             = lazy(() => import("@/routes/FitnessPage.jsx"));
 const CommunityPage           = lazy(() => import("@/routes/CommunityPage.jsx"));
 const TermsPage               = lazy(() => import("@/routes/TermsPage.jsx"));
-const ConvictionPage          = lazy(() => import("@/routes/ConvictionPage.tsx"));
+const FocusPostPage           = lazy(() => import("@/routes/FocusPostPage.tsx"));
 
 /* ── Simple skeleton fallback ── */
 const PageLoader = () => (
@@ -84,7 +84,7 @@ const router = createBrowserRouter([
       { path: "/fitness",              element: <Suspense fallback={<PageLoader />}><FitnessPage /></Suspense> },
       { path: "/community",            element: <Suspense fallback={<PageLoader />}><CommunityPage /></Suspense> },
       { path: "/terms",                element: <Suspense fallback={<PageLoader />}><TermsPage /></Suspense> },
-      { path: "/conviction",           element: <Suspense fallback={<PageLoader />}><ConvictionPage /></Suspense> },
+      { path: "/focus/:slug",          element: <Suspense fallback={<PageLoader />}><FocusPostPage /></Suspense> },
       { path: "/:slug",                element: <Suspense fallback={<PageLoader />}><SinglePostPage /></Suspense> },
       { path: "*",                     element: <NotFoundPage /> },
     ],
