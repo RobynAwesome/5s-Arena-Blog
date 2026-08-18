@@ -61,13 +61,16 @@ export default function FocusAtmosphere({
     const camera = new THREE.PerspectiveCamera(52, width / height, 0.1, 100);
     camera.position.z = 7;
 
+    // Reused mutable colour target: no Color allocation in the render loop.
+    const accentTarget = new THREE.Color(accent);
+
     const root = new THREE.Group();
     scene.add(root);
 
     const hemisphere = new THREE.HemisphereLight(0xdbeafe, 0x071018, 0.72);
     scene.add(hemisphere);
 
-    const keyLight = new THREE.DirectionalLight(new THREE.Color(accent), 0.58);
+    const keyLight = new THREE.DirectionalLight(accentTarget.clone(), 0.58);
     keyLight.position.set(2.5, 4, 5);
     scene.add(keyLight);
 
@@ -89,7 +92,7 @@ export default function FocusAtmosphere({
       new THREE.BufferAttribute(ambientPositions, 3),
     );
     const ambientMaterial = new THREE.PointsMaterial({
-      color: new THREE.Color(accent),
+      color: accentTarget.clone(),
       size: compact ? 0.04 : 0.032,
       transparent: true,
       opacity: 0.12,
@@ -168,7 +171,7 @@ export default function FocusAtmosphere({
     scene.add(accumulation);
 
     const ringMaterial = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(accent),
+      color: accentTarget.clone(),
       transparent: true,
       opacity: 0.07,
       depthWrite: false,
@@ -200,16 +203,16 @@ export default function FocusAtmosphere({
       const operations = state.weather;
       const rainCount = Math.floor(maxRain * clamp01(operations.rainIntensity));
       const snowCount = Math.floor(maxSnow * clamp01(operations.snowIntensity));
-      const accentColor = new THREE.Color(state.accent);
+      accentTarget.set(state.accent);
 
       rainGeometry.setDrawRange(0, rainCount);
       snowGeometry.setDrawRange(0, snowCount);
       rainMaterial.opacity = 0.22 + operations.rainIntensity * 0.5;
       snowMaterial.opacity = 0.36 + operations.snowIntensity * 0.52;
 
-      ambientMaterial.color.lerp(accentColor, 0.08);
-      ringMaterial.color.lerp(accentColor, 0.08);
-      keyLight.color.lerp(accentColor, 0.06);
+      ambientMaterial.color.lerp(accentTarget, 0.08);
+      ringMaterial.color.lerp(accentTarget, 0.08);
+      keyLight.color.lerp(accentTarget, 0.06);
       ambientMaterial.opacity =
         0.07 + clamp01(state.progress) * 0.08 + operations.lightLevel * 0.025;
       ringMaterial.opacity = 0.04 + clamp01(state.progress) * 0.05;
@@ -296,8 +299,12 @@ export default function FocusAtmosphere({
     const resize = () => {
       const nextWidth = mount.clientWidth || window.innerWidth;
       const nextHeight = mount.clientHeight || window.innerHeight;
+      const nextCompact = nextWidth < 520;
       camera.aspect = nextWidth / nextHeight;
       camera.updateProjectionMatrix();
+      renderer.setPixelRatio(
+        Math.min(window.devicePixelRatio || 1, nextCompact ? 1.15 : 1.45),
+      );
       renderer.setSize(nextWidth, nextHeight, false);
     };
 
