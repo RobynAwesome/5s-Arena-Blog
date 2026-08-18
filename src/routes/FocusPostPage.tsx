@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import ArticleFocusView, { type FocusArticle } from '@/components/ArticleFocusView';
+import { useArenaWeather } from '@/hooks/useArenaWeather';
 import { getPostBySlug } from '@/services/postService';
 
 export default function FocusPostPage() {
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
+  const requestedProvince = searchParams.get('province');
+  const weatherContext = useArenaWeather(requestedProvince);
   const [post, setPost] = useState<FocusArticle | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -66,5 +70,5 @@ export default function FocusPostPage() {
     );
   }
 
-  return <ArticleFocusView post={post} />;
+  return <ArticleFocusView post={post} weatherContext={weatherContext} />;
 }
