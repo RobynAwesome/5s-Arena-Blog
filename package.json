@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit --pretty false",
-    "validate:conviction": "node scripts/validate-conviction.mjs",
+    "validate:focus": "node scripts/validate-focus.mjs",
     "preview": "vite preview",
     "server": "node server/index.js",
     "seed": "node server/seed.js"
