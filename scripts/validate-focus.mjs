@@ -59,16 +59,24 @@ assert.match(focusView, /Swipe or use the arrows/);
 assert.match(focusView, /Standard/);
 assert.match(focusView, /min-h-11/);
 assert.match(focusView, /useReducedMotion/);
-assert.match(focusView, /weatherContext\?\.operations/);
+assert.match(focusView, /liveWeather\?\.operations/);
 assert.match(focusView, /data-weather-status/);
+assert.match(focusView, /100dvh/);
+assert.match(focusView, /isInteractiveTarget/);
+assert.match(focusView, /aria-hidden="true"/);
 assert.match(focusLib, /DOMParser/);
 assert.match(focusLib, /MAX_FRAMES = 24/);
 
 // Canonical province/weather truth is consumed rather than re-fetched from a
-// second browser-side provider. Unavailable upstream truth stays unavailable.
+// second browser-side provider. Loading/unavailable states must be neutral so
+// a province transition never renders stale weather from the previous locality.
 assert.match(weatherHook, /fivesarena\.locality\.v1/);
 assert.match(weatherHook, /\/organism\/weather/);
 assert.match(weatherHook, /NEUTRAL_WEATHER_OPERATIONS/);
+assert.match(weatherHook, /loadingContext/);
+assert.match(weatherHook, /setContext\(loadingContext\(provinceSlug\)\)/);
+assert.match(weatherHook, /if \(response\.data\?\.status !== 'live'\)/);
+assert.match(weatherHook, /validProvince\(requestedProvince\)/);
 assert.doesNotMatch(weatherHook, /open-meteo|api\.open-meteo/i);
 assert.match(organismRoute, /https:\/\/fivesarena\.com/);
 assert.match(organismRoute, /\/api\/organism\/feed\?province=/);
@@ -96,6 +104,9 @@ assert.match(atmosphere, /snowAccumulation/);
 assert.match(atmosphere, /PointLight/);
 assert.match(atmosphere, /returnStrokes/);
 assert.match(atmosphere, /operations\.mode === 'storm'/);
+assert.match(atmosphere, /const accentTarget = new THREE\.Color\(accent\)/);
+assert.match(atmosphere, /accentTarget\.set\(state\.accent\)/);
+assert.doesNotMatch(atmosphere, /new THREE\.Color\(state\.accent\)/);
 assert.doesNotMatch(atmosphere, /stormGeometry|stormPoints|new THREE\.Scene\(\).*storm/i);
 assert.match(atmosphere, /data-weather-engine="towers-operations"/);
 
