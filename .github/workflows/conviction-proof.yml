@@ -1,0 +1,40 @@
+name: Conviction Editorial Proof
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'scripts/validate-conviction.mjs'
+      - 'package.json'
+      - 'tsconfig.json'
+      - '.github/workflows/conviction-proof.yml'
+  push:
+    branches:
+      - feat/conviction-editorial-organism
+
+permissions:
+  contents: read
+
+jobs:
+  conviction-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Editorial truth contract
+        run: npm run validate:conviction
+
+      - name: TypeScript 7 native typecheck
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
