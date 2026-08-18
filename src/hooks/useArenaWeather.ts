@@ -70,20 +70,35 @@ function unavailableContext(provinceSlug: string): ArenaWeatherContext {
   };
 }
 
+function loadingContext(provinceSlug: string): ArenaWeatherContext {
+  return {
+    ...unavailableContext(provinceSlug),
+    status: 'loading',
+  };
+}
+
 export function useArenaWeather(requestedProvince?: string | null) {
   const [provinceSlug, setProvinceSlug] = useState(() => initialProvince(requestedProvince));
-  const [context, setContext] = useState<ArenaWeatherContext>(() => ({
-    ...unavailableContext(initialProvince(requestedProvince)),
-    status: 'loading',
-  }));
+  const [context, setContext] = useState<ArenaWeatherContext>(() =>
+    loadingContext(initialProvince(requestedProvince)),
+  );
 
   useEffect(() => {
     const requested = validProvince(requestedProvince);
-    if (requested) setProvinceSlug(requested);
+    if (requested) {
+      setProvinceSlug(requested);
+      return;
+    }
+
+    // Removing or invalidating a query override hands authority back to the
+    // saved Five's Arena locality instead of freezing the previous province.
+    setProvinceSlug(readSavedProvince() || DEFAULT_PROVINCE);
   }, [requestedProvince]);
 
   useEffect(() => {
-    if (requestedProvince) return;
+    // A valid URL province is an explicit override. Invalid/absent values do
+    // not suppress the canonical locality event stream.
+    if (validProvince(requestedProvince)) return;
 
     const onLocality = (event: Event) => {
       const detail = (event as CustomEvent<{ provinceSlug?: unknown }>).detail;
@@ -93,8 +108,7 @@ export function useArenaWeather(requestedProvince?: string | null) {
 
     const onStorage = (event: StorageEvent) => {
       if (event.key !== LOCALITY_STORAGE_KEY) return;
-      const next = readSavedProvince();
-      if (next) setProvinceSlug(next);
+      setProvinceSlug(readSavedProvince() || DEFAULT_PROVINCE);
     };
 
     window.addEventListener(LOCALITY_EVENT, onLocality);
@@ -110,15 +124,32 @@ export function useArenaWeather(requestedProvince?: string | null) {
     const controller = new AbortController();
 
     async function load() {
-      setContext((current) => ({ ...current, provinceSlug, status: 'loading' }));
+      // Never render the previous province's operations while new locality
+      // truth is in flight. Loading is explicitly neutral.
+      setContext(loadingContext(provinceSlug));
+
       try {
         const response = await api.get('/organism/weather', {
           params: { province: provinceSlug },
           signal: controller.signal,
         });
-        if (!mounted || response.data?.status !== 'live') return;
+        if (!mounted) return;
+
+        if (response.data?.status !== 'live') {
+          setContext(unavailableContext(provinceSlug));
+          return;
+        }
 
         const weather = response.data.weather;
+        if (
+          !weather ||
+          typeof weather.weatherCode !== 'number' ||
+          typeof weather.wind !== 'number'
+        ) {
+          setContext(unavailableContext(provinceSlug));
+          return;
+        }
+
         const sample: ArenaWeatherSample = {
           weatherCode: weather.weatherCode,
           wind: weather.wind,
