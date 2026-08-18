@@ -45,13 +45,14 @@ const RESERVED_ROOTS = new Set([
   "focus",
 ]);
 
-function getReaderModeItem(pathname) {
+function getReaderModeItem(pathname, search = "") {
+  const contextSuffix = search || "";
   const focusMatch = pathname.match(/^\/focus\/([^/]+)\/?$/);
   if (focusMatch) {
     return {
       icon: "▤",
       label: "Standard",
-      to: `/${focusMatch[1]}`,
+      to: `/${focusMatch[1]}${contextSuffix}`,
       hue: 145,
       color: "#22c55e",
     };
@@ -64,7 +65,7 @@ function getReaderModeItem(pathname) {
   return {
     icon: "◉",
     label: "Focus",
-    to: `/focus/${slug}`,
+    to: `/focus/${slug}${contextSuffix}`,
     hue: 45,
     color: "#f59e0b",
   };
@@ -78,7 +79,7 @@ export default function FloatingNavDropdown() {
 
   const isAdmin  = user?.role === "admin";
   const isAuthor = user?.role === "author" || isAdmin;
-  const readerModeItem = getReaderModeItem(location.pathname);
+  const readerModeItem = getReaderModeItem(location.pathname, location.search);
 
   const NAV_ITEMS = [
     ...(readerModeItem ? [readerModeItem] : []),
@@ -95,7 +96,7 @@ export default function FloatingNavDropdown() {
   }, []);
 
   /* Close on route change */
-  useEffect(() => { setOpen(false); }, [location.pathname]);
+  useEffect(() => { setOpen(false); }, [location.pathname, location.search]);
 
   if (!visible) return null;
 
@@ -118,7 +119,6 @@ export default function FloatingNavDropdown() {
               <ItemWrapper {...extraProps}
                 onClick={() => !item.external && setOpen(false)}
                 className="flex items-center gap-2.5 no-underline">
-                {/* Label */}
                 <motion.span
                   className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap"
                   style={{
@@ -134,7 +134,6 @@ export default function FloatingNavDropdown() {
                   {item.label}
                 </motion.span>
 
-                {/* Icon pill */}
                 <motion.div
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
                   style={{
@@ -152,7 +151,6 @@ export default function FloatingNavDropdown() {
         })}
       </AnimatePresence>
 
-      {/* Toggle button */}
       <motion.button
         onClick={() => setOpen(!open)}
         className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
