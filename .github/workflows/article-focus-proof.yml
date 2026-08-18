@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'src/**'
+      - 'server/**'
       - 'scripts/validate-focus.mjs'
       - 'package.json'
       - 'tsconfig.json'
@@ -30,8 +31,11 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Article focus contract
+      - name: Article focus + weather operations contract
         run: npm run validate:focus
+
+      - name: Organism membrane syntax
+        run: node --check server/index.js && node --check server/routes/organism.js
 
       - name: TypeScript 7 native typecheck
         run: npm run typecheck
