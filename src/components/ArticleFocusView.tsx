@@ -1,8 +1,9 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight, FiClock, FiGrid } from 'react-icons/fi';
 import { extractFocusFrames } from '@/lib/articleFocus';
+import type { ArenaWeatherContext } from '@/hooks/useArenaWeather';
 
 const FocusAtmosphere = lazy(() => import('@/components/FocusAtmosphere'));
 
@@ -39,6 +40,7 @@ export type FocusArticle = {
 
 type ArticleFocusViewProps = {
   post: FocusArticle;
+  weatherContext?: ArenaWeatherContext;
 };
 
 function frameSize(kind: string) {
@@ -48,7 +50,11 @@ function frameSize(kind: string) {
   return 'text-[clamp(1.9rem,7vw,4.2rem)]';
 }
 
-export default function ArticleFocusView({ post }: ArticleFocusViewProps) {
+export default function ArticleFocusView({
+  post,
+  weatherContext,
+}: ArticleFocusViewProps) {
+  const location = useLocation();
   const frames = useMemo(
     () => extractFocusFrames(post.content, post.title, post.excerpt),
     [post.content, post.excerpt, post.title],
@@ -61,6 +67,8 @@ export default function ArticleFocusView({ post }: ArticleFocusViewProps) {
   const previous = frames[activeIndex - 1];
   const next = frames[activeIndex + 1];
   const progress = frames.length > 1 ? activeIndex / (frames.length - 1) : 1;
+  const standardHref = `/${post.slug}${location.search}`;
+  const liveWeather = weatherContext?.status === 'live' ? weatherContext : null;
 
   const move = (direction: -1 | 1) => {
     setActiveIndex((current) => Math.max(0, Math.min(frames.length - 1, current + direction)));
@@ -94,43 +102,61 @@ export default function ArticleFocusView({ post }: ArticleFocusViewProps) {
         if (Math.abs(delta) < 48) return;
         move(delta > 0 ? 1 : -1);
       }}
+      data-weather-status={weatherContext?.status || 'unavailable'}
     >
       <div className="absolute inset-0 -z-30 bg-[radial-gradient(circle_at_50%_12%,rgba(34,197,94,0.12),transparent_42%),linear-gradient(180deg,#111827_0%,#080b0d_48%,#040506_100%)]" />
       {post.image ? (
         <div
-          className="absolute inset-0 -z-20 bg-cover bg-center opacity-[0.08] blur-2xl scale-110"
+          className="absolute inset-0 -z-20 scale-110 bg-cover bg-center opacity-[0.08] blur-2xl"
           style={{ backgroundImage: `url(${post.image})` }}
           aria-hidden="true"
         />
       ) : null}
       {!reducedMotion ? (
         <Suspense fallback={null}>
-          <FocusAtmosphere accent={accent} progress={progress} />
+          <FocusAtmosphere
+            accent={accent}
+            progress={progress}
+            weather={weatherContext?.operations}
+          />
         </Suspense>
       ) : null}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.72))]" />
 
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl flex-col px-4 pb-8 pt-5 sm:px-6 lg:px-8">
-        <header className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 p-3 backdrop-blur-xl sm:p-4">
-          <Link
-            to={`/${post.slug}`}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-3 text-[10px] font-black uppercase tracking-[0.14em] text-gray-200 transition hover:border-green-300/25 hover:text-white"
-            style={{ fontFamily: "'Montserrat',sans-serif" }}
-          >
-            <FiGrid /> Standard
-          </Link>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.18em] text-gray-500" style={{ fontFamily: "'Montserrat',sans-serif" }}>
-              <span style={{ color: accent }}>{post.category || 'Article'}</span>
-              {post.readingTime ? <><span>•</span><FiClock /><span>{post.readingTime} min</span></> : null}
+        <header className="rounded-2xl border border-white/10 bg-black/30 p-3 backdrop-blur-xl sm:p-4">
+          <div className="flex items-center gap-3">
+            <Link
+              to={standardHref}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-3 text-[10px] font-black uppercase tracking-[0.14em] text-gray-200 transition hover:border-green-300/25 hover:text-white"
+              style={{ fontFamily: "'Montserrat',sans-serif" }}
+            >
+              <FiGrid /> Standard
+            </Link>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2 text-[9px] font-black uppercase tracking-[0.18em] text-gray-500" style={{ fontFamily: "'Montserrat',sans-serif" }}>
+                <span style={{ color: accent }}>{post.category || 'Article'}</span>
+                {post.readingTime ? <><span>•</span><FiClock /><span>{post.readingTime} min</span></> : null}
+                {liveWeather ? (
+                  <>
+                    <span>•</span>
+                    <span className="text-gray-400">
+                      {liveWeather.province || liveWeather.weatherLabel || 'South Africa'}
+                    </span>
+                    <span className="text-gray-300">
+                      {liveWeather.condition}{liveWeather.temperature != null ? ` · ${liveWeather.temperature}°` : ''}
+                    </span>
+                  </>
+                ) : null}
+              </div>
+              <p className="mt-1 truncate text-sm font-semibold text-gray-200 sm:text-base" style={{ fontFamily: "'Oswald',sans-serif" }}>
+                {post.title}
+              </p>
             </div>
-            <p className="mt-1 truncate text-sm font-semibold text-gray-200 sm:text-base" style={{ fontFamily: "'Oswald',sans-serif" }}>
-              {post.title}
-            </p>
+            <span className="shrink-0 text-xs font-black text-gray-500" style={{ fontFamily: "'Montserrat',sans-serif" }}>
+              {activeIndex + 1}/{frames.length}
+            </span>
           </div>
-          <span className="shrink-0 text-xs font-black text-gray-500" style={{ fontFamily: "'Montserrat',sans-serif" }}>
-            {activeIndex + 1}/{frames.length}
-          </span>
         </header>
 
         <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/8" aria-hidden="true">
