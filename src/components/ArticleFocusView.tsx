@@ -44,10 +44,16 @@ type ArticleFocusViewProps = {
 };
 
 function frameSize(kind: string) {
-  if (kind === 'title') return 'text-[clamp(2.8rem,11vw,6.5rem)]';
-  if (kind === 'heading') return 'text-[clamp(2.35rem,9vw,5.4rem)]';
-  if (kind === 'quote') return 'text-[clamp(2.15rem,8vw,4.8rem)]';
-  return 'text-[clamp(1.9rem,7vw,4.2rem)]';
+  if (kind === 'title') return 'text-[clamp(2.35rem,10vw,6.5rem)]';
+  if (kind === 'heading') return 'text-[clamp(2.05rem,8.5vw,5.4rem)]';
+  if (kind === 'quote') return 'text-[clamp(1.9rem,7.5vw,4.8rem)]';
+  return 'text-[clamp(1.65rem,6.4vw,4.2rem)]';
+}
+
+function isInteractiveTarget(target: EventTarget | null) {
+  return target instanceof Element && Boolean(
+    target.closest('a,button,input,textarea,select,[contenteditable="true"]'),
+  );
 }
 
 export default function ArticleFocusView({
@@ -63,7 +69,7 @@ export default function ArticleFocusView({
   const touchStartRef = useRef<number | null>(null);
   const reducedMotion = useReducedMotion();
   const accent = CATEGORY_ACCENTS[post.category || ''] || '#22c55e';
-  const active = frames[activeIndex];
+  const active = frames[activeIndex] || frames[0];
   const previous = frames[activeIndex - 1];
   const next = frames[activeIndex + 1];
   const progress = frames.length > 1 ? activeIndex / (frames.length - 1) : 1;
@@ -76,6 +82,7 @@ export default function ArticleFocusView({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (isInteractiveTarget(event.target)) return;
       if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') move(-1);
       if (event.key === 'ArrowRight' || event.key === 'ArrowDown' || event.key === ' ') {
         event.preventDefault();
@@ -89,7 +96,7 @@ export default function ArticleFocusView({
 
   return (
     <section
-      className="relative isolate min-h-[calc(100vh-4rem)] overflow-hidden bg-[#070b0d] text-white"
+      className="relative isolate min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] overflow-hidden bg-[#070b0d] text-white"
       onTouchStart={(event) => {
         touchStartRef.current = event.changedTouches[0]?.clientY ?? null;
       }}
@@ -117,13 +124,13 @@ export default function ArticleFocusView({
           <FocusAtmosphere
             accent={accent}
             progress={progress}
-            weather={weatherContext?.operations}
+            weather={liveWeather?.operations}
           />
         </Suspense>
       ) : null}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.72))]" />
 
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl flex-col px-4 pb-8 pt-5 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] max-w-6xl flex-col px-4 pb-8 pt-5 sm:px-6 lg:px-8">
         <header className="rounded-2xl border border-white/10 bg-black/30 p-3 backdrop-blur-xl sm:p-4">
           <div className="flex items-center gap-3">
             <Link
@@ -168,15 +175,15 @@ export default function ArticleFocusView({
           />
         </div>
 
-        <div className="flex flex-1 items-center py-8 sm:py-12">
+        <div className="flex min-h-0 flex-1 items-center py-5 sm:py-12">
           <div className="w-full">
             <motion.p
               key={`previous-${activeIndex}`}
               initial={false}
               animate={{ opacity: previous ? 0.12 : 0 }}
-              className="mb-8 max-w-5xl text-[clamp(1.55rem,6vw,3.4rem)] font-black leading-[1.05] tracking-[-0.035em] text-white"
+              className="mb-5 max-w-5xl text-[clamp(1.25rem,5vw,3.4rem)] font-black leading-[1.05] tracking-[-0.035em] text-white sm:mb-8"
               style={{ fontFamily: "'Bebas Neue',Impact,sans-serif" }}
-              aria-hidden={!previous}
+              aria-hidden="true"
             >
               {previous?.text || ' '}
             </motion.p>
@@ -200,9 +207,9 @@ export default function ArticleFocusView({
               key={`next-${activeIndex}`}
               initial={false}
               animate={{ opacity: next ? 0.1 : 0 }}
-              className="mt-8 max-w-5xl text-[clamp(1.55rem,6vw,3.4rem)] font-black leading-[1.05] tracking-[-0.035em] text-white"
+              className="mt-5 max-w-5xl text-[clamp(1.25rem,5vw,3.4rem)] font-black leading-[1.05] tracking-[-0.035em] text-white sm:mt-8"
               style={{ fontFamily: "'Bebas Neue',Impact,sans-serif" }}
-              aria-hidden={!next}
+              aria-hidden="true"
             >
               {next?.text || ' '}
             </motion.p>
