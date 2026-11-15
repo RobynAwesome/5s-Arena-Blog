@@ -35,7 +35,7 @@ const packageJson = JSON.parse(pkg);
 const tsConfig = JSON.parse(tsconfig);
 
 assert.equal(packageJson.devDependencies.typescript, '^7.0.2');
-assert.equal(packageJson.devDependencies.vite, '^8.1.5');
+assert.equal(packageJson.devDependencies.vite, '^8.3.5');
 assert.equal(packageJson.dependencies.three, '^0.184.0');
 assert.equal(tsConfig.compilerOptions.strict, true);
 assert.equal(tsConfig.compilerOptions.allowJs, true);
